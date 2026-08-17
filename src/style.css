@@ -1,0 +1,384 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+html {
+  background: #eaf6ff;
+}
+
+body {
+  position: relative;
+
+  min-height: 780vh;
+
+  overflow-x: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      #eaf6ff 0%,
+      #f8fcff 50%,
+      #eaf6ff 100%
+    );
+
+  font-family:
+    Arial,
+    sans-serif;
+}
+
+
+/* ==================================================
+   THREE.JS
+   ================================================== */
+
+#app {
+  position: sticky;
+
+  top: 0;
+
+  width: 100%;
+  height: 100vh;
+
+  overflow: hidden;
+
+  z-index: 1;
+}
+
+canvas {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+}
+
+
+/* ==================================================
+   STORY UI
+   ================================================== */
+
+.bella-story-ui {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 5;
+
+  pointer-events: none;
+}
+
+.bella-story {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  padding:
+    clamp(40px, 6vw, 110px);
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  will-change:
+    opacity,
+    transform;
+}
+
+
+/* ==================================================
+   CARD
+   ================================================== */
+
+.bella-story-card {
+  width: min(570px, 38vw);
+
+  padding: 16px;
+
+  border-radius: 30px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.90),
+      rgba(234, 246, 255, 0.74)
+    );
+
+  border:
+    1px solid rgba(
+      255,
+      255,
+      255,
+      0.86
+    );
+
+  backdrop-filter:
+    blur(24px);
+
+  -webkit-backdrop-filter:
+    blur(24px);
+
+  box-shadow:
+    0 30px 90px rgba(2, 11, 30, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+
+/* ==================================================
+   POSICIONES
+   ================================================== */
+
+.bella-story-one {
+  justify-content: flex-start;
+}
+
+.bella-story-two {
+  justify-content: flex-end;
+}
+
+
+/* ==================================================
+   IMAGE
+   ================================================== */
+
+.bella-story-image {
+  width: 100%;
+
+  height: clamp(
+    220px,
+    27vh,
+    350px
+  );
+
+  overflow: hidden;
+
+  border-radius: 22px;
+}
+
+.bella-story-image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+
+/* ==================================================
+   TEXT
+   ================================================== */
+
+.bella-story-content {
+  position: relative;
+
+  padding:
+    28px 25px 24px;
+}
+
+.bella-story-number {
+  position: absolute;
+
+  right: 22px;
+  top: 25px;
+
+  color:
+    rgba(
+      18,
+      76,
+      124,
+      0.28
+    );
+
+  font-size: 3rem;
+
+  font-weight: 900;
+}
+
+.bella-story-eyebrow {
+  margin-bottom: 10px;
+
+  color: #124c7c;
+
+  font-size: 0.72rem;
+
+  font-weight: 900;
+
+  letter-spacing: 3px;
+
+  text-transform: uppercase;
+}
+
+.bella-story-content h2 {
+  max-width: 440px;
+
+  margin-bottom: 16px;
+
+  color: #020b1e;
+
+  font-size:
+    clamp(
+      1.9rem,
+      2.5vw,
+      3rem
+    );
+
+  line-height: 1.03;
+
+  letter-spacing: -1px;
+}
+
+.bella-story-content > p:last-child {
+  max-width: 440px;
+
+  color: #526b80;
+
+  line-height: 1.7;
+}
+
+
+/* ==================================================
+   SCROLL INDICATOR
+   ================================================== */
+
+.scroll-indicator {
+  position: fixed;
+
+  z-index: 7;
+
+  left: 50%;
+  bottom: 24px;
+
+  transform:
+    translateX(-50%);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 8px;
+
+  pointer-events: none;
+}
+
+.scroll-indicator span {
+  color:
+    rgba(
+      2,
+      11,
+      30,
+      0.42
+    );
+
+  font-size: 0.65rem;
+
+  font-weight: 900;
+
+  letter-spacing: 4px;
+}
+
+.scroll-indicator div {
+  width: 1px;
+  height: 34px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #124c7c,
+      transparent
+    );
+}
+
+
+/* ==================================================
+   TABLET
+   ================================================== */
+
+@media (max-width: 991px) {
+
+  body {
+    min-height: 650vh;
+  }
+
+  .bella-story-card {
+    width:
+      min(
+        520px,
+        58vw
+      );
+  }
+}
+
+
+/* ==================================================
+   MOBILE
+   ================================================== */
+
+@media (max-width: 768px) {
+
+  body {
+    min-height: 560vh;
+  }
+
+  .bella-story {
+    align-items: flex-end;
+
+    padding:
+      20px 18px 70px;
+  }
+
+  .bella-story-one,
+  .bella-story-two {
+    justify-content: center;
+  }
+
+  .bella-story-card {
+    width: 100%;
+
+    max-width: 460px;
+  }
+
+  .bella-story-image {
+    height: 180px;
+  }
+
+  .bella-story-content {
+    padding:
+      21px 18px 18px;
+  }
+
+  .bella-story-content h2 {
+    font-size: 1.75rem;
+  }
+}
+
+
+/* ==================================================
+   REDUCED MOTION
+   ================================================== */
+
+@media (
+  prefers-reduced-motion: reduce
+) {
+
+  body {
+    min-height: 100vh;
+  }
+
+  .bella-story-ui,
+  .scroll-indicator {
+    display: none;
+  }
+}
