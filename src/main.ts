@@ -5,6 +5,7 @@ import { BellaBuilding } from './building/BellaBuilding'
 import { DebugPanel } from './core/DebugPanel'
 import { RuntimePreferences } from './core/RuntimePreferences'
 import { ScrollDirector } from './core/ScrollDirector'
+import { Atmosphere } from './world/Atmosphere'
 
 
 // ==================================================
@@ -133,13 +134,6 @@ const scene =
 scene.background =
   new THREE.Color(
     '#020711',
-  )
-
-
-scene.fog =
-  new THREE.FogExp2(
-    0x06101d,
-    0.013,
   )
 
 
@@ -1826,463 +1820,13 @@ scene.add(
 
 
 // ==================================================
-// TEXTURA DE NIEBLA
+// ATMÓSFERA
 // ==================================================
 
-function createSoftTexture(
-  innerColor: string,
-  middleColor: string,
-): THREE.CanvasTexture {
-
-  const fogCanvas =
-    document.createElement(
-      'canvas',
-    )
-
-
-  fogCanvas.width =
-    256
-
-
-  fogCanvas.height =
-    256
-
-
-  const context =
-    fogCanvas.getContext(
-      '2d',
-    )
-
-
-  if (!context) {
-
-    throw new Error(
-      'No se pudo crear textura atmosférica',
-    )
-  }
-
-
-  const gradient =
-    context.createRadialGradient(
-      128,
-      128,
-      0,
-
-      128,
-      128,
-      128,
-    )
-
-
-  gradient.addColorStop(
-    0,
-    innerColor,
+const atmosphere =
+  new Atmosphere(
+    scene,
   )
-
-
-  gradient.addColorStop(
-    0.38,
-    middleColor,
-  )
-
-
-  gradient.addColorStop(
-    1,
-    'rgba(0,0,0,0)',
-  )
-
-
-  context.fillStyle =
-    gradient
-
-
-  context.fillRect(
-    0,
-    0,
-    256,
-    256,
-  )
-
-
-  const texture =
-    new THREE.CanvasTexture(
-      fogCanvas,
-    )
-
-
-  texture.colorSpace =
-    THREE.SRGBColorSpace
-
-
-  return texture
-}
-
-
-// ==================================================
-// NIEBLA
-// ==================================================
-
-type FogLayer = {
-
-  sprite:
-    THREE.Sprite
-
-  baseX:
-    number
-
-  baseY:
-    number
-
-  speed:
-    number
-
-  amplitudeX:
-    number
-
-  amplitudeY:
-    number
-
-  baseOpacity:
-    number
-}
-
-
-const fogLayers:
-  FogLayer[] = []
-
-
-const coolFogTexture =
-  createSoftTexture(
-    'rgba(112,170,205,.22)',
-    'rgba(48,92,122,.10)',
-  )
-
-
-const blueFogTexture =
-  createSoftTexture(
-    'rgba(50,116,160,.18)',
-    'rgba(20,61,92,.08)',
-  )
-
-
-function addFogLayer(
-  x: number,
-  y: number,
-  z: number,
-  width: number,
-  height: number,
-  opacity: number,
-  speed: number,
-  amplitudeX: number,
-  amplitudeY: number,
-  texture:
-    THREE.Texture =
-      coolFogTexture,
-): void {
-
-  const material =
-    new THREE.SpriteMaterial({
-      map:
-        texture,
-
-      color:
-        '#ffffff',
-
-      transparent:
-        true,
-
-      opacity,
-
-      depthWrite:
-        false,
-
-      depthTest:
-        true,
-
-      blending:
-        THREE.NormalBlending,
-    })
-
-
-  const sprite =
-    new THREE.Sprite(
-      material,
-    )
-
-
-  sprite.position.set(
-    x,
-    y,
-    z,
-  )
-
-
-  sprite.scale.set(
-    width,
-    height,
-    1,
-  )
-
-
-  scene.add(
-    sprite,
-  )
-
-
-  fogLayers.push({
-    sprite,
-
-    baseX:
-      x,
-
-    baseY:
-      y,
-
-    speed,
-
-    amplitudeX,
-
-    amplitudeY,
-
-    baseOpacity:
-      opacity,
-  })
-}
-
-
-// --------------------------------------------------
-// Niebla entre montañas
-// --------------------------------------------------
-
-addFogLayer(
-  -8,
-  2.2,
-  -35,
-  26,
-  6,
-  0.12,
-  0.025,
-  1.1,
-  0.08,
-)
-
-
-addFogLayer(
-  10,
-  1.4,
-  -31,
-  28,
-  5,
-  0.10,
-  0.022,
-  1.0,
-  0.07,
-  blueFogTexture,
-)
-
-
-// --------------------------------------------------
-// Detrás del hotel
-// --------------------------------------------------
-
-addFogLayer(
-  -4.8,
-  8.2,
-  -3.4,
-  13,
-  11,
-  0.14,
-  0.075,
-  0.55,
-  0.18,
-)
-
-
-addFogLayer(
-  5.4,
-  10.2,
-  -2.8,
-  15,
-  12,
-  0.11,
-  0.06,
-  0.42,
-  0.2,
-  blueFogTexture,
-)
-
-
-// --------------------------------------------------
-// Laterales
-// --------------------------------------------------
-
-addFogLayer(
-  -5.9,
-  4.7,
-  1.0,
-  10,
-  7,
-  0.09,
-  0.09,
-  0.65,
-  0.15,
-  blueFogTexture,
-)
-
-
-addFogLayer(
-  6.0,
-  5.9,
-  0.7,
-  11,
-  8,
-  0.08,
-  0.082,
-  0.55,
-  0.17,
-)
-
-
-// --------------------------------------------------
-// Niebla baja
-// --------------------------------------------------
-
-addFogLayer(
-  -2.8,
-  1.15,
-  2.0,
-  10,
-  3.2,
-  0.11,
-  0.11,
-  0.8,
-  0.07,
-)
-
-
-addFogLayer(
-  3.8,
-  1.0,
-  1.7,
-  11,
-  3.0,
-  0.10,
-  0.085,
-  0.7,
-  0.06,
-  blueFogTexture,
-)
-
-
-// ==================================================
-// HALO ENTRADA
-// ==================================================
-
-const warmGlowTexture =
-  createSoftTexture(
-    'rgba(255,181,103,.95)',
-    'rgba(255,119,52,.22)',
-  )
-
-
-const entranceGlowMaterial =
-  new THREE.SpriteMaterial({
-    map:
-      warmGlowTexture,
-
-    transparent:
-      true,
-
-    opacity:
-      0.20,
-
-    depthWrite:
-      false,
-
-    blending:
-      THREE.AdditiveBlending,
-  })
-
-
-const entranceGlow =
-  new THREE.Sprite(
-    entranceGlowMaterial,
-  )
-
-
-entranceGlow.position.set(
-  0.8,
-  1.65,
-  1.75,
-)
-
-
-entranceGlow.scale.set(
-  4.2,
-  3.5,
-  1,
-)
-
-
-scene.add(
-  entranceGlow,
-)
-
-
-// ==================================================
-// HALO FRÍO FACHADA
-// ==================================================
-
-const coldGlowTexture =
-  createSoftTexture(
-    'rgba(94,184,235,.52)',
-    'rgba(25,90,135,.12)',
-  )
-
-
-const coldGlowMaterial =
-  new THREE.SpriteMaterial({
-    map:
-      coldGlowTexture,
-
-    transparent:
-      true,
-
-    opacity:
-      0.055,
-
-    depthWrite:
-      false,
-
-    blending:
-      THREE.AdditiveBlending,
-  })
-
-
-const facadeGlow =
-  new THREE.Sprite(
-    coldGlowMaterial,
-  )
-
-
-facadeGlow.position.set(
-  0,
-  8.3,
-  1,
-)
-
-
-facadeGlow.scale.set(
-  13,
-  15,
-  1,
-)
-
-
-scene.add(
-  facadeGlow,
-)
-
 
 // ==================================================
 // CÁMARAS POR CAPÍTULO
@@ -2465,6 +2009,291 @@ const runtimePreferences =
 
 let exactProgress =
   scrollDirector.exactProgress
+
+
+// ==================================================
+// SCRIM GLOBAL
+//
+// A single fixed layer protects DOM readability without allowing any section
+// boundary to pass across the persistent Three.js world.
+// ==================================================
+
+type WorldScrimState = {
+  leftOpacity: number
+  middleOpacity: number
+  rightOpacity: number
+  middleStop: number
+  rightStop: number
+  focalX: number
+  focalY: number
+  focalWidth: number
+  focalHeight: number
+  focalCoreOpacity: number
+  focalSoftOpacity: number
+}
+
+
+const worldScrim =
+  document.querySelector<HTMLElement>(
+    '.bella-world-scrim',
+  )
+
+
+const worldScrimStates:
+  WorldScrimState[] = [
+
+  {
+    leftOpacity: 0.88,
+    middleOpacity: 0.60,
+    rightOpacity: 0.16,
+    middleStop: 34,
+    rightStop: 65,
+    focalX: 22,
+    focalY: 50,
+    focalWidth: 82,
+    focalHeight: 68,
+    focalCoreOpacity: 0,
+    focalSoftOpacity: 0,
+  },
+
+
+  {
+    leftOpacity: 0.36,
+    middleOpacity: 0.14,
+    rightOpacity: 0.02,
+    middleStop: 46,
+    rightStop: 78,
+    focalX: 22,
+    focalY: 50,
+    focalWidth: 80,
+    focalHeight: 62,
+    focalCoreOpacity: 0.58,
+    focalSoftOpacity: 0.20,
+  },
+
+
+  {
+    leftOpacity: 0.20,
+    middleOpacity: 0.08,
+    rightOpacity: 0.02,
+    middleStop: 38,
+    rightStop: 74,
+    focalX: 54,
+    focalY: 48,
+    focalWidth: 100,
+    focalHeight: 76,
+    focalCoreOpacity: 0.42,
+    focalSoftOpacity: 0.23,
+  },
+
+
+  {
+    leftOpacity: 0.24,
+    middleOpacity: 0.08,
+    rightOpacity: 0.02,
+    middleStop: 45,
+    rightStop: 78,
+    focalX: 50,
+    focalY: 50,
+    focalWidth: 96,
+    focalHeight: 76,
+    focalCoreOpacity: 0.30,
+    focalSoftOpacity: 0.12,
+  },
+
+]
+
+
+function updateWorldScrim(
+  progress: number,
+): void {
+
+  if (
+    !worldScrim
+  ) {
+    return
+  }
+
+
+  const maxIndex =
+    worldScrimStates.length -
+    1
+
+
+  const clampedProgress =
+    clamp(
+      progress,
+      0,
+      maxIndex,
+    )
+
+
+  const startIndex =
+    Math.floor(
+      clampedProgress,
+    )
+
+
+  const endIndex =
+    Math.min(
+      startIndex +
+      1,
+      maxIndex,
+    )
+
+
+  const localProgress =
+    clampedProgress -
+    startIndex
+
+
+  const eased =
+    localProgress *
+    localProgress *
+    (
+      3 -
+      2 *
+      localProgress
+    )
+
+
+  const start =
+    worldScrimStates[
+      startIndex
+    ]
+
+
+  const end =
+    worldScrimStates[
+      endIndex
+    ]
+
+
+  const interpolate = (
+    key: keyof WorldScrimState,
+  ): number =>
+    THREE.MathUtils.lerp(
+      start[
+        key
+      ],
+      end[
+        key
+      ],
+      eased,
+    )
+
+
+  const setValue = (
+    property: string,
+    value: number,
+    unit: string =
+      '',
+  ): void => {
+
+    worldScrim.style.setProperty(
+      property,
+      `${
+        value.toFixed(
+          3,
+        )
+      }${unit}`,
+    )
+  }
+
+
+  setValue(
+    '--bella-scrim-left',
+    interpolate(
+      'leftOpacity',
+    ),
+  )
+
+
+  setValue(
+    '--bella-scrim-middle',
+    interpolate(
+      'middleOpacity',
+    ),
+  )
+
+
+  setValue(
+    '--bella-scrim-right',
+    interpolate(
+      'rightOpacity',
+    ),
+  )
+
+
+  setValue(
+    '--bella-scrim-middle-stop',
+    interpolate(
+      'middleStop',
+    ),
+    '%',
+  )
+
+
+  setValue(
+    '--bella-scrim-right-stop',
+    interpolate(
+      'rightStop',
+    ),
+    '%',
+  )
+
+
+  setValue(
+    '--bella-scrim-focal-x',
+    interpolate(
+      'focalX',
+    ),
+    '%',
+  )
+
+
+  setValue(
+    '--bella-scrim-focal-y',
+    interpolate(
+      'focalY',
+    ),
+    '%',
+  )
+
+
+  setValue(
+    '--bella-scrim-focal-width',
+    interpolate(
+      'focalWidth',
+    ),
+    '%',
+  )
+
+
+  setValue(
+    '--bella-scrim-focal-height',
+    interpolate(
+      'focalHeight',
+    ),
+    '%',
+  )
+
+
+  setValue(
+    '--bella-scrim-focal-core',
+    interpolate(
+      'focalCoreOpacity',
+    ),
+  )
+
+
+  setValue(
+    '--bella-scrim-focal-soft',
+    interpolate(
+      'focalSoftOpacity',
+    ),
+  )
+}
 
 
 // ==================================================
@@ -3248,113 +3077,12 @@ function updateAtmosphere(
   progress: number,
 ): void {
 
-  fogLayers.forEach(
-    (
-      layer,
-      index,
-    ) => {
-
-      const phase =
-        index *
-        1.73
-
-
-      layer.sprite.position.x =
-        layer.baseX +
-        Math.sin(
-          elapsed *
-          layer.speed +
-          phase,
-        ) *
-        layer.amplitudeX
-
-
-      layer.sprite.position.y =
-        layer.baseY +
-        Math.cos(
-          elapsed *
-          layer.speed *
-          0.7 +
-          phase,
-        ) *
-        layer.amplitudeY
-
-
-      const distanceBoost =
-        THREE.MathUtils.lerp(
-          0.9,
-          1.14,
-
-          clamp(
-            progress /
-            2,
-
-            0,
-
-            1,
-          ),
-        )
-
-
-      const material =
-        layer.sprite
-          .material as
-          THREE.SpriteMaterial
-
-
-      material.opacity =
-        layer.baseOpacity *
-        distanceBoost
-
-    },
+  atmosphere.update(
+    elapsed,
+    progress,
+    runtimePreferences.prefersReducedMotion,
   )
-
-
-  // --------------------------------------------------
-  // Entrada cálida
-  // --------------------------------------------------
-
-  entranceGlowMaterial.opacity =
-    0.20 +
-    Math.sin(
-      elapsed *
-      1.15,
-    ) *
-      0.018
-
-
-  entranceGlow.scale.set(
-    4.15 +
-      Math.sin(
-        elapsed *
-        0.78,
-      ) *
-        0.07,
-
-    3.45 +
-      Math.sin(
-        elapsed *
-        0.78,
-      ) *
-        0.06,
-
-    1,
-  )
-
-
-  // --------------------------------------------------
-  // Halo frío fachada
-  // --------------------------------------------------
-
-  coldGlowMaterial.opacity =
-    0.055 +
-    Math.sin(
-      elapsed *
-      0.32,
-    ) *
-      0.008
 }
-
 
 // ==================================================
 // PROGRESS BAR
@@ -3552,6 +3280,11 @@ function animate(
 
       delta,
     )
+
+
+  updateWorldScrim(
+    smoothProgress,
+  )
 
 
   // --------------------------------------------------
