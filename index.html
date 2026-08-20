@@ -2,114 +2,333 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
 
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
-  />
+  >
 
   <title>
-    Bella Durmiente · Building Scroll Experience
+    Bella Durmiente · Cinematic Experience
   </title>
 </head>
 
 <body>
 
-  <!-- Three.js -->
-  <div id="app"></div>
-
   <!-- ==================================================
-       CAPAS EDITORIALES
+       ESCENA THREE.JS
+       Permanece fija detrás de todos los capítulos.
        ================================================== -->
 
-  <div class="bella-story-ui">
+  <canvas
+    id="bella-gl"
+    aria-hidden="true"
+  ></canvas>
 
-    <!-- SECCIÓN 01 -->
-    <section
-      class="bella-story bella-story-one"
-      id="storyOne"
+
+  <!-- Oscurecimiento cinematográfico -->
+  <div
+    class="bella-vignette"
+    aria-hidden="true"
+  ></div>
+
+  <div
+    class="bella-grain"
+    aria-hidden="true"
+  ></div>
+
+  <!-- ==================================================
+      BELLA FOREGROUND · CHAPTER 01
+      Capa decorativa cercana.
+      ================================================== -->
+
+  <div
+    class="bella-fg-stage"
+    id="bellaForeground"
+    aria-hidden="true"
+  >
+
+    <!-- Rama superior izquierda -->
+    <span
+      class="bella-fg-el bella-fg-branch"
+      data-fg-role="branch"
+      data-fg-in="left"
     >
-      <div class="bella-story-card">
-
-        <div class="bella-story-image">
-          <img
-            src="/story/habitacion-01.jpg"
-            alt="Habitación matrimonial Bella Durmiente"
-          >
-        </div>
-
-        <div class="bella-story-content">
-
-          <span class="bella-story-number">
-            01
-          </span>
-
-          <p class="bella-story-eyebrow">
-            Descanso
-          </p>
-
-          <h2>
-            Espacios pensados
-            para descansar mejor
-          </h2>
-
-          <p>
-            Habitaciones cómodas y tranquilas para disfrutar
-            una estadía agradable en Huancayo.
-          </p>
-
-        </div>
-
-      </div>
-    </section>
+      <img
+        src="/foreground/bella-branch-left.webp"
+        alt=""
+        decoding="async"
+      >
+    </span>
 
 
-    <!-- SECCIÓN 02 -->
-    <section
-      class="bella-story bella-story-two"
-      id="storyTwo"
+    <!-- Jardín inferior izquierdo -->
+    <span
+      class="bella-fg-el bella-fg-garden"
+      data-fg-role="garden"
+      data-fg-in="up"
     >
-      <div class="bella-story-card">
+      <img
+        src="/foreground/bella-garden-left.webp"
+        alt=""
+        decoding="async"
+      >
+    </span>
 
-        <div class="bella-story-image">
-          <img
-            src="/story/habitacion-02.jpg"
-            alt="Habitación Bella Durmiente con vista"
-          >
-        </div>
 
-        <div class="bella-story-content">
-
-          <span class="bella-story-number">
-            02
-          </span>
-
-          <p class="bella-story-eyebrow">
-            Bella Durmiente
-          </p>
-
-          <h2>
-            Una estadía diferente
-            en Huancayo
-          </h2>
-
-          <p>
-            Comodidad, atención cercana y una experiencia
-            diseñada alrededor del huésped.
-          </p>
-
-        </div>
-
-      </div>
-    </section>
+    <!-- Árbol derecho -->
+    <span
+      class="bella-fg-el bella-fg-tree"
+      data-fg-role="tree"
+      data-fg-in="right"
+    >
+      <img
+        src="/foreground/bella-tree-right.webp"
+        alt=""
+        decoding="async"
+      >
+    </span>
 
   </div>
 
 
-  <div class="scroll-indicator">
-    <span>SCROLL</span>
-    <div></div>
+  <!-- ==================================================
+       CONTENIDO
+       ================================================== -->
+
+  <main class="bella-page">
+
+
+    <!-- ==================================================
+         CHAPTER 00 · HERO
+         ================================================== -->
+
+    <section
+      class="bella-chapter bella-hero"
+      id="hero"
+      data-bella-cam="0"
+    >
+
+      <div class="bella-chapter-inner">
+
+        <div class="bella-hero-copy">
+
+          <p class="bella-eyebrow">
+            Hospedaje boutique · Huancayo
+          </p>
+
+          <h2>
+            Descansa donde cada noche
+            <em>se siente especial</em>
+          </h2>
+
+          <p class="bella-body">
+            Habitaciones acogedoras, atención cercana
+            y una estadía tranquila para disfrutar
+            Huancayo a tu propio ritmo.
+          </p>
+
+          <div class="bella-actions">
+
+            <a href="#experience">
+              Reservar ahora
+            </a>
+
+            <a
+              href="#rooms"
+              class="bella-action-secondary"
+            >
+              Ver habitaciones
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="bella-scroll-cue">
+        <span>DESCUBRIR</span>
+        <i></i>
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         CHAPTER 01 · EXPERIENCIA
+         ================================================== -->
+
+    <section
+      class="bella-chapter bella-experience"
+      id="experience"
+      data-bella-cam="1"
+    >
+
+      <div class="bella-chapter-inner">
+
+        <div class="bella-experience-copy">
+
+          <p class="bella-eyebrow">
+            01 · Experiencia Bella Durmiente
+          </p>
+
+          <h2 class="bella-display-title">
+            Un hospedaje pensado
+            <span>para descansar mejor</span>
+          </h2>
+
+          <p class="bella-body">
+            Bella Durmiente combina comodidad,
+            tranquilidad y una atención cercana
+            para que cada huésped disfrute una
+            estadía agradable, segura y organizada.
+          </p>
+
+          <ul class="bella-feature-list">
+
+            <li>
+              Habitaciones cómodas para distintos
+              tipos de estadía.
+            </li>
+
+            <li>
+              Reservas online conectadas al sistema
+              administrativo.
+            </li>
+
+            <li>
+              Atención para huéspedes, familias,
+              docentes y delegaciones.
+            </li>
+
+          </ul>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         CHAPTER 02 · HABITACIONES
+         ================================================== -->
+
+    <section
+      class="bella-chapter bella-rooms"
+      id="rooms"
+      data-bella-cam="2"
+    >
+
+      <div class="bella-chapter-inner bella-rooms-inner">
+
+        <header class="bella-rooms-head">
+
+          <p class="bella-eyebrow">
+            02 · Habitaciones reales
+          </p>
+
+          <h2 class="bella-display-title">
+            Espacios cómodos
+            <span>para tu estadía</span>
+          </h2>
+
+          <p class="bella-body">
+            Ambientes preparados para huéspedes,
+            parejas, familias y delegaciones que
+            visitan Huancayo.
+          </p>
+
+        </header>
+
+
+        <div class="bella-room-grid">
+
+          <article class="bella-room-card">
+
+            <div class="bella-room-image">
+              <img
+                src="/story/habitacion-01.jpg"
+                alt="Habitación matrimonial Bella Durmiente"
+              >
+            </div>
+
+            <div class="bella-room-card-copy">
+              <span>01</span>
+              <h3>Habitación matrimonial</h3>
+              <p>Comodidad para una o dos personas.</p>
+            </div>
+
+          </article>
+
+
+          <article class="bella-room-card">
+
+            <div class="bella-room-image">
+              <img
+                src="/story/habitacion-02.jpg"
+                alt="Habitación con vista Bella Durmiente"
+              >
+            </div>
+
+            <div class="bella-room-card-copy">
+              <span>02</span>
+              <h3>Matrimonial con vista</h3>
+              <p>Luz natural y descanso tranquilo.</p>
+            </div>
+
+          </article>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         SALIDA DEL PILOTO
+         ================================================== -->
+
+    <section
+      class="bella-chapter bella-ending"
+      data-bella-cam="3"
+    >
+
+      <div class="bella-ending-copy">
+
+        <p class="bella-eyebrow">
+          Hospedaje Bella Durmiente
+        </p>
+
+        <h2>
+          Tu descanso comienza aquí.
+        </h2>
+
+        <p>
+          Fin del piloto cinematográfico.
+        </p>
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+
+  <!-- ==================================================
+       PROGRESO
+       ================================================== -->
+
+  <div
+    class="bella-progress"
+    aria-hidden="true"
+  >
+    <i id="bellaProgress"></i>
   </div>
 
 
