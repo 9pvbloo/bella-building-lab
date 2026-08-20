@@ -1,8 +1,278 @@
 import * as THREE from 'three'
 
+function createSeededRandom(
+  seed: number,
+): () => number {
+
+  let value =
+    seed >>>
+    0
+
+
+  return (): number => {
+
+    value +=
+      0x6d2b79f5
+
+
+    let mixed =
+      value
+
+
+    mixed =
+      Math.imul(
+        mixed ^
+        mixed >>>
+          15,
+        mixed |
+          1,
+      )
+
+
+    mixed ^=
+      mixed +
+      Math.imul(
+        mixed ^
+        mixed >>>
+          7,
+        mixed |
+          61,
+      )
+
+
+    return (
+      (
+        mixed ^
+        mixed >>>
+          14
+      ) >>>
+      0
+    ) /
+      4294967296
+  }
+}
+
+
+/**
+ * A single restrained, repeatable concrete source shared by the facade
+ * materials. It deliberately favours soft tonal drift and a small bump over
+ * obvious stains or surface noise, so the facade remains maintained at night.
+ */
+function createConcreteTexture():
+  THREE.CanvasTexture {
+
+  const size =
+    512
+
+
+  const canvas =
+    document.createElement(
+      'canvas',
+    )
+
+
+  canvas.width =
+    size
+
+
+  canvas.height =
+    size
+
+
+  const context =
+    canvas.getContext(
+      '2d',
+    )
+
+
+  if (!context) {
+    throw new Error(
+      'No se pudo crear la textura de concreto Bella',
+    )
+  }
+
+
+  const random =
+    createSeededRandom(
+      4303,
+    )
+
+
+  const image =
+    context.createImageData(
+      size,
+      size,
+    )
+
+
+  for (
+    let pixel =
+      0;
+    pixel <
+    image.data.length;
+    pixel +=
+      4
+  ) {
+
+    const grain =
+      Math.round(
+        222 +
+        (
+          random() -
+          0.5
+        ) *
+          12,
+      )
+
+
+    image.data[pixel] =
+      grain
+
+
+    image.data[
+      pixel +
+      1
+    ] =
+      grain +
+      2
+
+
+    image.data[
+      pixel +
+      2
+    ] =
+      grain +
+      3
+
+
+    image.data[
+      pixel +
+      3
+    ] =
+      255
+  }
+
+
+  context.putImageData(
+    image,
+    0,
+    0,
+  )
+
+
+  // Sparse, low-alpha vertical variation suggests maintained concrete that
+  // has lived through highland weather without turning into visible grime.
+  for (
+    let index =
+      0;
+    index <
+    18;
+    index +=
+      1
+  ) {
+
+    const x =
+      random() *
+      size
+
+
+    const width =
+      THREE.MathUtils.lerp(
+        8,
+        34,
+        random(),
+      )
+
+
+    const gradient =
+      context.createLinearGradient(
+        x,
+        0,
+        x +
+          width,
+        size,
+      )
+
+
+    gradient.addColorStop(
+      0,
+      'rgba(67, 82, 86, 0)',
+    )
+
+
+    gradient.addColorStop(
+      0.5,
+      'rgba(67, 82, 86, 0.028)',
+    )
+
+
+    gradient.addColorStop(
+      1,
+      'rgba(67, 82, 86, 0)',
+    )
+
+
+    context.fillStyle =
+      gradient
+
+
+    context.fillRect(
+      x -
+        width,
+      0,
+      width *
+        3,
+      size,
+    )
+  }
+
+
+  const texture =
+    new THREE.CanvasTexture(
+      canvas,
+    )
+
+
+  texture.colorSpace =
+    THREE.SRGBColorSpace
+
+
+  texture.wrapS =
+    THREE.RepeatWrapping
+
+
+  texture.wrapT =
+    THREE.RepeatWrapping
+
+
+  texture.repeat.set(
+    3.4,
+    5.6,
+  )
+
+
+  texture.minFilter =
+    THREE.LinearMipmapLinearFilter
+
+
+  texture.magFilter =
+    THREE.LinearFilter
+
+
+  texture.generateMipmaps =
+    true
+
+
+  return texture
+}
+
+
 export class BellaBuilding extends THREE.Group {
 
   private readonly showBuildingSigns = false
+
+  private readonly concreteTexture =
+    createConcreteTexture()
 
   // ==================================================
   // MATERIALES BASE
@@ -11,51 +281,60 @@ export class BellaBuilding extends THREE.Group {
   private readonly concreteMat =
     new THREE.MeshStandardMaterial({
       color: '#66737e',
-      roughness: 0.88,
+      map: this.concreteTexture,
+      bumpMap: this.concreteTexture,
+      bumpScale: 0.018,
+      roughness: 0.86,
       metalness: 0.02,
     })
 
 
   private readonly concreteLightMat =
     new THREE.MeshStandardMaterial({
-      color: '#a7b2ba',
-      roughness: 0.82,
+      color: '#98a5ad',
+      map: this.concreteTexture,
+      bumpMap: this.concreteTexture,
+      bumpScale: 0.014,
+      roughness: 0.8,
       metalness: 0.02,
     })
 
 
   private readonly concreteDarkMat =
     new THREE.MeshStandardMaterial({
-      color: '#283641',
-      roughness: 0.91,
+      color: '#24323c',
+      map: this.concreteTexture,
+      bumpMap: this.concreteTexture,
+      bumpScale: 0.012,
+      roughness: 0.89,
       metalness: 0.01,
     })
 
 
   private readonly frameMat =
     new THREE.MeshStandardMaterial({
-      color: '#6b7d8a',
-      roughness: 0.7,
-      metalness: 0.1,
+      color: '#586d7b',
+      roughness: 0.64,
+      metalness: 0.12,
     })
 
 
   private readonly darkMetalMat =
     new THREE.MeshStandardMaterial({
       color: '#07111c',
-      roughness: 0.46,
-      metalness: 0.3,
+      roughness: 0.56,
+      metalness: 0.22,
     })
 
 
   private readonly entranceBlueMat =
     new THREE.MeshStandardMaterial({
-      color: '#07345e',
-      roughness: 0.38,
-      metalness: 0.16,
+      color: '#0a263b',
+      roughness: 0.52,
+      metalness: 0.12,
 
-      emissive: '#062748',
-      emissiveIntensity: 0.28,
+      emissive: '#071827',
+      emissiveIntensity: 0.035,
     })
 
 
@@ -65,67 +344,67 @@ export class BellaBuilding extends THREE.Group {
 
   private readonly glassBlueMat =
     new THREE.MeshStandardMaterial({
-      color: '#053263',
-      roughness: 0.2,
-      metalness: 0.2,
+      color: '#082b52',
+      roughness: 0.36,
+      metalness: 0.28,
 
-      emissive: '#05254a',
-      emissiveIntensity: 0.34,
+      emissive: '#06182e',
+      emissiveIntensity: 0.045,
     })
 
 
   private readonly glassDeepMat =
     new THREE.MeshStandardMaterial({
-      color: '#021a34',
-      roughness: 0.25,
-      metalness: 0.16,
+      color: '#041729',
+      roughness: 0.46,
+      metalness: 0.2,
 
-      emissive: '#03182e',
-      emissiveIntensity: 0.16,
+      emissive: '#020a12',
+      emissiveIntensity: 0.012,
     })
 
 
   private readonly glassColdMat =
     new THREE.MeshStandardMaterial({
-      color: '#07518d',
-      roughness: 0.18,
-      metalness: 0.24,
+      color: '#0a3c60',
+      roughness: 0.32,
+      metalness: 0.3,
 
-      emissive: '#07406e',
-      emissiveIntensity: 0.46,
+      emissive: '#0a243b',
+      emissiveIntensity: 0.07,
     })
 
 
   private readonly glassSoftMat =
     new THREE.MeshStandardMaterial({
-      color: '#123a5c',
-      roughness: 0.24,
-      metalness: 0.12,
+      color: '#102f47',
+      roughness: 0.43,
+      metalness: 0.18,
 
-      emissive: '#102d45',
-      emissiveIntensity: 0.23,
+      emissive: '#0b1d2b',
+      emissiveIntensity: 0.025,
     })
 
 
   private readonly warmGlassMat =
     new THREE.MeshStandardMaterial({
-      color: '#60452f',
-      roughness: 0.27,
+      color: '#5d3e27',
+      roughness: 0.4,
       metalness: 0.03,
 
-      emissive: '#ff9c4a',
-      emissiveIntensity: 1.65,
+      emissive: '#f29b50',
+      emissiveIntensity: 0.48,
     })
 
 
   private readonly warmWindowMat =
     new THREE.MeshStandardMaterial({
-      color: '#654829',
-      roughness: 0.3,
+      color: '#553820',
+      roughness: 0.44,
       metalness: 0.02,
 
-      emissive: '#e98535',
-      emissiveIntensity: 0.72,
+      emissive: '#e98b42',
+      emissiveIntensity: 0.2,
     })
 
 
@@ -239,7 +518,32 @@ export class BellaBuilding extends THREE.Group {
   private buildUpperFacade(): void {
 
     const frontZ =
-      0.83
+      0.825
+
+
+    // Dark returns sit over the primary mass. The glass then recesses into
+    // them while structural members finish proud, giving the facade three
+    // distinct planes under the moving moon light.
+    this.addBox(
+      1.04,
+      8.96,
+      0.08,
+      -2.25,
+      8.63,
+      0.78,
+      this.concreteDarkMat,
+    )
+
+
+    this.addBox(
+      2.3,
+      8.98,
+      0.08,
+      0.03,
+      8.61,
+      0.78,
+      this.concreteDarkMat,
+    )
 
 
     // ==================================================
@@ -249,7 +553,7 @@ export class BellaBuilding extends THREE.Group {
     this.addBox(
       0.88,
       8.75,
-      0.13,
+      0.09,
       -2.25,
       8.63,
       frontZ,
@@ -276,7 +580,7 @@ export class BellaBuilding extends THREE.Group {
     this.addBox(
       2.14,
       8.78,
-      0.14,
+      0.09,
       0.03,
       8.61,
       frontZ + 0.01,
@@ -346,9 +650,20 @@ export class BellaBuilding extends THREE.Group {
 
 
     this.addBox(
+      1.74,
+      6.62,
+      0.08,
+      rightX,
+      9.25,
+      0.78,
+      this.concreteDarkMat,
+    )
+
+
+    this.addBox(
       1.58,
       1.58,
-      0.13,
+      0.09,
       rightX,
       11.68,
       frontZ,
@@ -360,7 +675,7 @@ export class BellaBuilding extends THREE.Group {
     this.addBox(
       1.58,
       1.58,
-      0.13,
+      0.09,
       rightX,
       9.25,
       frontZ,
@@ -372,7 +687,7 @@ export class BellaBuilding extends THREE.Group {
     this.addBox(
       1.58,
       1.58,
-      0.13,
+      0.09,
       rightX,
       6.82,
       frontZ,
@@ -444,13 +759,13 @@ export class BellaBuilding extends THREE.Group {
             ? 9.0
             : 9.4,
 
-          0.2,
+          0.16,
 
           x,
 
           8.5,
 
-          frontZ + 0.025,
+          frontZ + 0.055,
 
           this.concreteLightMat,
         )
@@ -469,7 +784,7 @@ export class BellaBuilding extends THREE.Group {
       0.2,
       rightX,
       10.46,
-      frontZ + 0.04,
+      frontZ + 0.055,
       this.concreteLightMat,
     )
 
@@ -480,7 +795,7 @@ export class BellaBuilding extends THREE.Group {
       0.2,
       rightX,
       8.03,
-      frontZ + 0.04,
+      frontZ + 0.055,
       this.concreteLightMat,
     )
 
@@ -493,7 +808,7 @@ export class BellaBuilding extends THREE.Group {
       0.2,
       0.06,
       4.98,
-      frontZ + 0.04,
+      frontZ + 0.055,
       this.concreteLightMat,
     )
 
@@ -505,21 +820,21 @@ export class BellaBuilding extends THREE.Group {
     this.addAwningWindow(
       1.82,
       9.25,
-      frontZ + 0.26,
+      frontZ + 0.2,
     )
 
 
     this.addAwningWindow(
       2.46,
       6.82,
-      frontZ + 0.26,
+      frontZ + 0.2,
     )
 
 
     this.addAwningWindow(
       0.42,
       6.22,
-      frontZ + 0.26,
+      frontZ + 0.2,
     )
   }
 
@@ -531,7 +846,20 @@ export class BellaBuilding extends THREE.Group {
   private buildLowerFacade(): void {
 
     const frontZ =
-      0.86
+      0.83
+
+
+    // This continuous return connects the five glazed bays back to the main
+    // concrete volume, preserving a narrow shadow line around the full band.
+    this.addBox(
+      6.18,
+      1.76,
+      0.08,
+      0,
+      4.0,
+      0.78,
+      this.concreteDarkMat,
+    )
 
 
     const positions =
@@ -563,7 +891,7 @@ export class BellaBuilding extends THREE.Group {
         this.addBox(
           0.96,
           1.48,
-          0.12,
+          0.085,
           x,
           4.0,
           frontZ,
@@ -597,8 +925,9 @@ export class BellaBuilding extends THREE.Group {
           0.14,
           x,
           4.0,
-          frontZ + 0.05,
+          frontZ + 0.055,
           this.frameMat,
+          false,
         )
 
       },
@@ -611,8 +940,9 @@ export class BellaBuilding extends THREE.Group {
       0.16,
       0,
       4.82,
-      frontZ + 0.04,
+      frontZ + 0.05,
       this.frameMat,
+      false,
     )
   }
 
@@ -631,28 +961,25 @@ export class BellaBuilding extends THREE.Group {
       'BellaMainEntrance'
 
 
-    /*
-       El acceso ahora sobresale bastante más.
-
-       Eso hace que desde ángulos pequeños
-       realmente genere silueta, sombra y profundidad.
-    */
-
     const facadeZ =
-      1.02
+      0.94
 
 
     // ==================================================
     // HUECO DE RECEPCIÓN
+    //
+    // The dark shell begins in the facade mass, while the glazed door remains
+    // set inside it. This preserves a readable dark-to-warm threshold rather
+    // than treating the reception as a luminous plane on the wall.
     // ==================================================
 
     this.addBoxTo(
       entrance,
-      1.52,
-      2.28,
-      0.25,
+      1.64,
+      2.4,
+      0.34,
       0.75,
-      1.34,
+      1.36,
       facadeZ,
       this.darkMetalMat,
     )
@@ -660,33 +987,67 @@ export class BellaBuilding extends THREE.Group {
 
     this.addBoxTo(
       entrance,
-      0.94,
-      1.8,
-      0.08,
+      1.2,
+      1.84,
+      0.055,
       0.75,
-      1.34,
-      facadeZ + 0.16,
+      1.32,
+      facadeZ + 0.205,
       this.warmGlassMat,
       false,
     )
 
 
+    // Door division and transom retain legible reception material inside the
+    // warm field. They are deliberately non-shadow-casting fine details.
+    this.addBoxTo(
+      entrance,
+      0.06,
+      1.74,
+      0.08,
+      0.75,
+      1.32,
+      facadeZ + 0.24,
+      this.frameMat,
+      false,
+    )
+
+
+    this.addBoxTo(
+      entrance,
+      1.24,
+      0.06,
+      0.08,
+      0.75,
+      2.2,
+      facadeZ + 0.24,
+      this.frameMat,
+      false,
+    )
+
+
+    this.addBoxTo(
+      entrance,
+      1.38,
+      0.09,
+      0.48,
+      0.75,
+      0.43,
+      facadeZ + 0.17,
+      this.darkMetalMat,
+    )
+
+
     // ==================================================
     // PORTAL ARQUITECTÓNICO
-    //
-    // Nuestro equivalente a ese gran elemento
-    // que dirige la mirada en Kage.
-    //
-    // No es un torii.
-    // Son dos pilastras hoteleras.
     // ==================================================
 
     this.addBoxTo(
       entrance,
-      0.25,
-      3.15,
-      0.52,
-      -0.18,
+      0.28,
+      3.12,
+      0.44,
+      -0.2,
       1.68,
       facadeZ + 0.28,
       this.entranceBlueMat,
@@ -695,10 +1056,10 @@ export class BellaBuilding extends THREE.Group {
 
     this.addBoxTo(
       entrance,
-      0.25,
-      3.15,
-      0.52,
-      1.68,
+      0.28,
+      3.12,
+      0.44,
+      1.7,
       1.68,
       facadeZ + 0.28,
       this.entranceBlueMat,
@@ -713,12 +1074,12 @@ export class BellaBuilding extends THREE.Group {
 
     this.addBoxTo(
       entrance,
-      0.045,
-      2.5,
+      0.04,
+      2.38,
       0.04,
       -0.04,
       1.63,
-      facadeZ + 0.57,
+      facadeZ + 0.525,
       warmStrip,
       false,
     )
@@ -726,12 +1087,12 @@ export class BellaBuilding extends THREE.Group {
 
     this.addBoxTo(
       entrance,
-      0.045,
-      2.5,
+      0.04,
+      2.38,
       0.04,
       1.54,
       1.63,
-      facadeZ + 0.57,
+      facadeZ + 0.525,
       warmStrip,
       false,
     )
@@ -743,9 +1104,9 @@ export class BellaBuilding extends THREE.Group {
 
     this.addBoxTo(
       entrance,
-      2.12,
-      0.25,
-      0.54,
+      2.18,
+      0.28,
+      0.46,
       0.75,
       3.13,
       facadeZ + 0.28,
@@ -760,12 +1121,12 @@ export class BellaBuilding extends THREE.Group {
     const canopy =
       this.addBoxTo(
         entrance,
-        2.72,
-        0.18,
-        1.72,
-        0.75,
-        2.76,
-        facadeZ + 0.79,
+      2.76,
+      0.2,
+      1.38,
+      0.75,
+      2.76,
+      facadeZ + 0.68,
         this.entranceBlueMat,
       )
 
@@ -776,16 +1137,29 @@ export class BellaBuilding extends THREE.Group {
       )
 
 
-    // Luz bajo marquesina
+    // Underside and its narrow practical keep the canopy from becoming a
+    // floating blue slab. The practical is visible only from the threshold.
 
     this.addBoxTo(
       entrance,
-      2.12,
-      0.06,
-      0.12,
+      2.44,
+      0.055,
+      1.16,
       0.75,
-      2.6,
-      facadeZ + 1.59,
+      2.63,
+      facadeZ + 0.69,
+      this.darkMetalMat,
+      false,
+    )
+
+    this.addBoxTo(
+      entrance,
+      1.5,
+      0.035,
+      0.08,
+      0.75,
+      2.59,
+      facadeZ + 1.05,
       warmStrip,
       false,
     )
@@ -797,46 +1171,25 @@ export class BellaBuilding extends THREE.Group {
 
     this.addBoxTo(
       entrance,
-      2.9,
-      0.13,
-      1.55,
+      3.0,
+      0.15,
+      1.48,
       0.75,
-      0.12,
-      facadeZ + 0.72,
+      0.08,
+      facadeZ + 0.51,
       this.concreteLightMat,
     )
 
 
     this.addBoxTo(
       entrance,
-      2.48,
-      0.10,
-      1.12,
+      2.6,
+      0.12,
+      1.04,
       0.75,
-      0.23,
-      facadeZ + 0.86,
+      0.215,
+      facadeZ + 0.78,
       this.concreteMat,
-    )
-
-
-    // ==================================================
-    // MINI TÓTEM AL COSTADO DE LA ENTRADA
-    // ==================================================
-
-    const miniSign =
-      this.createMiniEntranceSign()
-
-
-    this.addBoxTo(
-      entrance,
-      0.48,
-      1.5,
-      0.16,
-      1.98,
-      0.92,
-      facadeZ + 0.75,
-      miniSign,
-      false,
     )
 
 
@@ -923,6 +1276,19 @@ export class BellaBuilding extends THREE.Group {
 
   private buildRoof(): void {
 
+    // A slim dark underlap gives the cornice a real separation from the mass
+    // below without changing the established roof silhouette.
+    this.addBox(
+      6.08,
+      0.1,
+      1.9,
+      0.16,
+      13.52,
+      -0.06,
+      this.concreteDarkMat,
+    )
+
+
     // Remate general
 
     this.addBox(
@@ -986,6 +1352,7 @@ export class BellaBuilding extends THREE.Group {
       14.12,
       0.08,
       this.concreteLightMat,
+      false,
     )
   }
 
@@ -999,13 +1366,24 @@ export class BellaBuilding extends THREE.Group {
     // Portón izquierdo
 
     this.addBox(
-      1.38,
-      2.2,
-      0.16,
+      1.52,
+      2.34,
+      0.08,
       -1.96,
       1.31,
-      0.88,
+      0.79,
+      this.concreteDarkMat,
+    )
+
+    this.addBox(
+      1.38,
+      2.2,
+      0.09,
+      -1.96,
+      1.31,
+      0.84,
       this.entranceBlueMat,
+      false,
     )
 
 
@@ -1033,12 +1411,22 @@ export class BellaBuilding extends THREE.Group {
     // Sector derecho
 
     this.addBox(
-      1.25,
-      1.66,
-      0.12,
+      1.4,
+      1.8,
+      0.08,
       2.45,
       1.3,
-      0.89,
+      0.79,
+      this.concreteDarkMat,
+    )
+
+    this.addBox(
+      1.25,
+      1.66,
+      0.085,
+      2.45,
+      1.3,
+      0.84,
       this.glassDeepMat,
       false,
     )
@@ -1052,6 +1440,7 @@ export class BellaBuilding extends THREE.Group {
       1.35,
       0.96,
       this.frameMat,
+      false,
     )
 
 
@@ -1063,6 +1452,7 @@ export class BellaBuilding extends THREE.Group {
       1.35,
       0.96,
       this.frameMat,
+      false,
     )
   }
 
@@ -1133,21 +1523,23 @@ export class BellaBuilding extends THREE.Group {
 
   private buildLighting(): void {
 
-    // Luz interior de recepción
+    // A contained practical reinforces the recessed glazing. The world-level
+    // reception light remains the broader cue; this one is intentionally too
+    // short-ranged to wash the lower facade.
 
     const receptionLight =
       new THREE.PointLight(
-        '#ffad68',
-        6.3,
-        7.5,
+        '#ffb36b',
+        2.25,
+        4.8,
         2,
       )
 
 
     receptionLight.position.set(
       0.75,
-      1.75,
-      2.2,
+      1.52,
+      1.4,
     )
 
 
@@ -1159,32 +1551,6 @@ export class BellaBuilding extends THREE.Group {
       receptionLight,
     )
 
-
-    /*
-       Luz fría de fachada MUCHO más suave.
-
-       Antes podía generar un punto azul demasiado evidente.
-    */
-
-    const facadeLight =
-      new THREE.PointLight(
-        '#6cbce9',
-        1.15,
-        10,
-        2,
-      )
-
-
-    facadeLight.position.set(
-      -1.5,
-      10.0,
-      3.7,
-    )
-
-
-    this.add(
-      facadeLight,
-    )
   }
 
 
@@ -1204,7 +1570,7 @@ export class BellaBuilding extends THREE.Group {
       0.035,
       x,
       y,
-      0.94,
+      0.925,
       material,
       false,
     )
@@ -1331,16 +1697,16 @@ export class BellaBuilding extends THREE.Group {
 
     return new THREE.MeshStandardMaterial({
       color:
-        '#ffd6a3',
+        '#c9905a',
 
       emissive:
-        '#ff9b45',
+        '#f0a65d',
 
       emissiveIntensity:
-        3.4,
+        0.82,
 
       roughness:
-        0.35,
+        0.42,
 
       metalness:
         0.02,
@@ -1609,143 +1975,6 @@ export class BellaBuilding extends THREE.Group {
         0.5,
     })
   }
-
-
-  // ==================================================
-  // MINI SIGN ENTRADA
-  // ==================================================
-
-  private createMiniEntranceSign():
-    THREE.MeshStandardMaterial {
-
-    const canvas =
-      document.createElement(
-        'canvas',
-      )
-
-
-    canvas.width =
-      320
-
-
-    canvas.height =
-      720
-
-
-    const context =
-      canvas.getContext(
-        '2d',
-      )
-
-
-    if (!context) {
-      throw new Error(
-        'No se pudo crear mini sign',
-      )
-    }
-
-
-    context.fillStyle =
-      '#041b35'
-
-
-    context.fillRect(
-      0,
-      0,
-      320,
-      720,
-    )
-
-
-    context.strokeStyle =
-      'rgba(190,225,245,.55)'
-
-
-    context.lineWidth =
-      8
-
-
-    context.strokeRect(
-      12,
-      12,
-      296,
-      696,
-    )
-
-
-    context.fillStyle =
-      '#eef8ff'
-
-
-    context.textAlign =
-      'center'
-
-
-    context.font =
-      '600 42px Georgia'
-
-
-    context.fillText(
-      'Bella',
-      160,
-      270,
-    )
-
-
-    context.font =
-      '600 39px Georgia'
-
-
-    context.fillText(
-      'Durmiente',
-      160,
-      320,
-    )
-
-
-    context.fillStyle =
-      '#9ed5f2'
-
-
-    context.font =
-      '700 22px Arial'
-
-
-    context.fillText(
-      'HOSPEDAJE',
-      160,
-      390,
-    )
-
-
-    const texture =
-      new THREE.CanvasTexture(
-        canvas,
-      )
-
-
-    texture.colorSpace =
-      THREE.SRGBColorSpace
-
-
-    return new THREE.MeshStandardMaterial({
-      map:
-        texture,
-
-      emissiveMap:
-        texture,
-
-      emissive:
-        '#19567d',
-
-      emissiveIntensity:
-        0.38,
-
-      roughness:
-        0.45,
-    })
-  }
-
 
   // ==================================================
   // HELPERS
