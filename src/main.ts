@@ -2,6 +2,9 @@ import * as THREE from 'three'
 import './style.css'
 
 import { BellaBuilding } from './building/BellaBuilding'
+import { DebugPanel } from './core/DebugPanel'
+import { RuntimePreferences } from './core/RuntimePreferences'
+import { ScrollDirector } from './core/ScrollDirector'
 
 
 // ==================================================
@@ -2444,6 +2447,27 @@ if (
 
 
 // ==================================================
+// RUNTIME STATE
+//
+// exactProgress remains the native-scroll source of truth.
+// smoothProgress is declared below and only drives visual interpolation.
+// ==================================================
+
+const scrollDirector =
+  new ScrollDirector(
+    chapters,
+  )
+
+
+const runtimePreferences =
+  new RuntimePreferences()
+
+
+let exactProgress =
+  scrollDirector.exactProgress
+
+
+// ==================================================
 // FOREGROUND
 // ==================================================
 
@@ -2602,153 +2626,6 @@ function updateActiveChapter(
         850,
       )
   }
-}
-
-
-// ==================================================
-// PROGRESO SCROLL
-// ==================================================
-
-let targetChapterProgress =
-  0
-
-
-function calculateChapterProgress():
-  void {
-
-  const viewportCenter =
-    window.scrollY +
-    window.innerHeight *
-      0.5
-
-
-  const first =
-    chapters[
-      0
-    ]
-
-
-  const firstCenter =
-    first.offsetTop +
-    first.offsetHeight *
-      0.5
-
-
-  if (
-    viewportCenter <=
-    firstCenter
-  ) {
-
-    targetChapterProgress =
-      0
-
-
-    updateActiveChapter(
-      0,
-    )
-
-
-    return
-  }
-
-
-  for (
-    let i =
-      0;
-    i <
-      chapters.length -
-        1;
-    i += 1
-  ) {
-
-    const current =
-      chapters[
-        i
-      ]
-
-
-    const next =
-      chapters[
-        i +
-        1
-      ]
-
-
-    const currentCenter =
-      current.offsetTop +
-      current.offsetHeight *
-        0.5
-
-
-    const nextCenter =
-      next.offsetTop +
-      next.offsetHeight *
-        0.5
-
-
-    if (
-      viewportCenter >=
-        currentCenter &&
-      viewportCenter <
-        nextCenter
-    ) {
-
-      const distance =
-        nextCenter -
-        currentCenter
-
-
-      const local =
-        distance >
-        0
-          ? (
-              viewportCenter -
-              currentCenter
-            ) /
-            distance
-          : 0
-
-
-      const normalized =
-        clamp(
-          local,
-          0,
-          1,
-        )
-
-
-      targetChapterProgress =
-        i +
-        normalized
-
-
-      const activeIndex =
-        normalized <
-          0.5
-          ? i
-          : i +
-            1
-
-
-      updateActiveChapter(
-        activeIndex,
-      )
-
-
-      return
-    }
-  }
-
-
-  targetChapterProgress =
-    chapters.length -
-    1
-
-
-  updateActiveChapter(
-    chapters.length -
-      1,
-  )
 }
 
 
@@ -3525,6 +3402,26 @@ function updateProgressBar():
 }
 
 
+function syncExactScrollState():
+  void {
+
+  const scrollState =
+    scrollDirector.update()
+
+
+  exactProgress =
+    scrollState.exactProgress
+
+
+  updateActiveChapter(
+    scrollState.activeChapterIndex,
+  )
+
+
+  updateProgressBar()
+}
+
+
 // ==================================================
 // SCROLL
 // ==================================================
@@ -3532,9 +3429,7 @@ function updateProgressBar():
 function handleScroll():
   void {
 
-  calculateChapterProgress()
-
-  updateProgressBar()
+  syncExactScrollState()
 }
 
 
@@ -3550,43 +3445,113 @@ window.addEventListener(
 )
 
 
-calculateChapterProgress()
-
-updateProgressBar()
+handleScroll()
 
 
 // ==================================================
 // ANIMATION LOOP
 // ==================================================
 
-const clock =
-  new THREE.Clock()
+const debugPanel =
+  DebugPanel.isEnabled()
+    ? new DebugPanel()
+    : undefined
 
 
-function animate():
+let animationFrameId:
+  number | undefined
+
+
+let lastFrameTime:
+  number | undefined
+
+
+let elapsed =
+  0
+
+
+let latestFrameTime =
+  0
+
+
+function scheduleAnimation():
   void {
+
+  if (
+    !runtimePreferences.isDocumentVisible ||
+    animationFrameId !==
+      undefined
+  ) {
+    return
+  }
+
+
+  animationFrameId =
+    requestAnimationFrame(
+      animate,
+    )
+}
+
+
+function animate(
+  frameTime: number,
+):
+  void {
+
+  animationFrameId =
+    undefined
+
+
+  if (
+    !runtimePreferences.isDocumentVisible
+  ) {
+    return
+  }
+
+
+  const rawDelta =
+    lastFrameTime ===
+      undefined
+      ? 0
+      : (
+          frameTime -
+          lastFrameTime
+        ) /
+        1000
 
   const delta =
     Math.min(
-      clock.getDelta(),
+      Math.max(
+        rawDelta,
+        0,
+      ),
       0.05,
     )
+
+
+  lastFrameTime =
+    frameTime
+
+
+  latestFrameTime =
+    rawDelta *
+    1000
+
+
+  elapsed +=
+    rawDelta
 
 
   smoothProgress =
     damp(
       smoothProgress,
 
-      targetChapterProgress,
+      exactProgress,
 
       4.6,
 
       delta,
     )
-
-
-  const elapsed =
-    clock.elapsedTime
 
 
   // --------------------------------------------------
@@ -3677,13 +3642,120 @@ function animate():
   )
 
 
-  requestAnimationFrame(
-    animate,
-  )
+  const rendererInfo =
+    renderer.info
+
+
+  const programCount =
+    (
+      rendererInfo as unknown as {
+        programs?: unknown[]
+      }
+    ).programs?.length ??
+    0
+
+
+  debugPanel?.update({
+    exactProgress,
+    smoothProgress,
+    activeChapterIndex:
+      scrollDirector.activeChapterIndex,
+    scrollDirection:
+      scrollDirector.direction,
+    cameraPosition:
+      camera.position,
+    cameraTarget:
+      currentTarget,
+    fov:
+      camera.fov,
+    frameTime:
+      latestFrameTime,
+    fps:
+      latestFrameTime >
+      0
+        ? 1000 /
+          latestFrameTime
+        : 0,
+    renderCalls:
+      rendererInfo.render.calls,
+    triangles:
+      rendererInfo.render.triangles,
+    textures:
+      rendererInfo.memory.textures,
+    programs:
+      programCount,
+  })
+
+
+  scheduleAnimation()
 }
 
 
-animate()
+let wasDocumentVisible =
+  runtimePreferences.isDocumentVisible
+
+
+runtimePreferences.subscribe(
+  (
+    runtimeState,
+  ) => {
+
+    if (
+      runtimeState.isDocumentVisible ===
+      wasDocumentVisible
+    ) {
+      return
+    }
+
+
+    wasDocumentVisible =
+      runtimeState.isDocumentVisible
+
+
+    if (
+      !runtimeState.isDocumentVisible
+    ) {
+
+      if (
+        animationFrameId !==
+        undefined
+      ) {
+
+        cancelAnimationFrame(
+          animationFrameId,
+        )
+
+
+        animationFrameId =
+          undefined
+      }
+
+
+      lastFrameTime =
+        undefined
+
+
+      return
+    }
+
+
+    // Rebuild scroll state before visual interpolation resumes.
+    syncExactScrollState()
+
+
+    // Hidden-tab time must not become an animation delta.
+    lastFrameTime =
+      undefined
+
+
+    scheduleAnimation()
+  },
+)
+
+
+animate(
+  performance.now(),
+)
 
 
 // ==================================================
@@ -3752,7 +3824,7 @@ window.addEventListener(
 
     resize()
 
-    calculateChapterProgress()
+    syncExactScrollState()
 
   },
 )
