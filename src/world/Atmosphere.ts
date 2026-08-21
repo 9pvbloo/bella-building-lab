@@ -160,22 +160,22 @@ export class Atmosphere {
     // Global fog: broad depth separation across the full persistent world.
     scene.fog =
       new THREE.FogExp2(
-        0x06101d,
-        0.013,
+        0x0a1117,
+        0.0115,
       )
 
 
     const coolFogTexture =
       createSoftTexture(
-        'rgba(112,170,205,.22)',
-        'rgba(48,92,122,.10)',
+        'rgba(218,237,243,.22)',
+        'rgba(112,139,151,.10)',
       )
 
 
     const blueFogTexture =
       createSoftTexture(
-        'rgba(50,116,160,.18)',
-        'rgba(20,61,92,.08)',
+        'rgba(149,181,194,.16)',
+        'rgba(45,68,82,.075)',
       )
 
 
@@ -220,7 +220,7 @@ export class Atmosphere {
       -3.4,
       13,
       11,
-      0.14,
+      0.16,
       0.075,
       0.55,
       0.18,
@@ -236,7 +236,7 @@ export class Atmosphere {
       -2.8,
       15,
       12,
-      0.11,
+      0.14,
       0.06,
       0.42,
       0.2,
@@ -312,8 +312,8 @@ export class Atmosphere {
 
     const warmGlowTexture =
       createSoftTexture(
-        'rgba(255,181,103,.95)',
-        'rgba(255,119,52,.22)',
+        'rgba(255,205,144,.82)',
+        'rgba(218,137,79,.18)',
       )
 
 
@@ -326,7 +326,7 @@ export class Atmosphere {
           true,
 
         opacity:
-          0.20,
+          0.17,
 
         depthWrite:
           false,
@@ -367,8 +367,8 @@ export class Atmosphere {
 
     const coldGlowTexture =
       createSoftTexture(
-        'rgba(94,184,235,.52)',
-        'rgba(25,90,135,.12)',
+        'rgba(211,236,245,.34)',
+        'rgba(90,124,140,.09)',
       )
 
 
@@ -381,7 +381,7 @@ export class Atmosphere {
           true,
 
         opacity:
-          0.055,
+          0.07,
 
         depthWrite:
           false,
@@ -505,7 +505,7 @@ export class Atmosphere {
 
     // Existing localized warmth remains the human visual anchor.
     this.entranceGlowMaterial.opacity =
-      0.20 +
+      0.17 +
       Math.sin(
         elapsed *
         1.15,
@@ -533,7 +533,7 @@ export class Atmosphere {
 
 
     this.coldGlowMaterial.opacity =
-      0.055 +
+      0.07 +
       Math.sin(
         elapsed *
         0.32,

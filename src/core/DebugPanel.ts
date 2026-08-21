@@ -33,6 +33,13 @@ export type DebugPanelSnapshot = {
     midCount: number
     nearCount: number
   }
+  courtyard: {
+    profile: string
+    treeCount: number
+    shrubCount: number
+    grassCount: number
+    rockCount: number
+  }
 }
 
 
@@ -119,6 +126,7 @@ export class DebugPanel {
       `textures ${snapshot.textures} · programs ${snapshot.programs}`,
       `sky ${snapshot.nightSky.visibleStarCount} stars · shooting ${snapshot.nightSky.activeShootingStarCount}/4 · queue ${snapshot.nightSky.pendingShootingStarCount} · next ${format(snapshot.nightSky.secondsUntilNextShootingStarEvent, 1)}s`,
       `rain ${snapshot.rain.profile} · ${snapshot.rain.particleCount} streaks · ${snapshot.rain.farCount}/${snapshot.rain.midCount}/${snapshot.rain.nearCount}`,
+      `courtyard ${snapshot.courtyard.profile} · ${snapshot.courtyard.treeCount} trees · ${snapshot.courtyard.shrubCount} shrubs · ${snapshot.courtyard.grassCount} grasses · ${snapshot.courtyard.rockCount} rocks`,
     ].join(
       '\n',
     )

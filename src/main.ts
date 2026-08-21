@@ -13,6 +13,7 @@ import { ScrollDirector } from './core/ScrollDirector'
 import { mountRoomsClothProof } from './effects/cloth/RoomsClothProof'
 import { BellaWordmark } from './typography/BellaWordmark'
 import { Atmosphere } from './world/Atmosphere'
+import { BellaCourtyard } from './world/BellaCourtyard'
 import { Moon } from './world/Moon'
 import { NightSky } from './world/NightSky'
 import { Rain } from './world/Rain'
@@ -143,7 +144,7 @@ const scene =
 
 scene.background =
   new THREE.Color(
-    '#020711',
+    '#05090f',
   )
 
 
@@ -224,7 +225,7 @@ renderer.toneMapping =
 
 
 renderer.toneMappingExposure =
-  0.82
+  0.87
 
 
 renderer.shadowMap.enabled =
@@ -246,9 +247,9 @@ renderer.shadowMap.type =
 
 const hemisphere =
   new THREE.HemisphereLight(
-    '#355f7c',
-    '#01040a',
-    0.78,
+    '#60747d',
+    '#020508',
+    0.58,
   )
 
 
@@ -263,8 +264,8 @@ scene.add(
 
 const moonLight =
   new THREE.DirectionalLight(
-    '#b8dcf4',
-    2.15,
+    '#dbeef5',
+    2.52,
   )
 
 
@@ -315,13 +316,13 @@ scene.add(
 
 
 // --------------------------------------------------
-// Relleno azul
+// Relleno lunar de acero
 // --------------------------------------------------
 
 const blueFill =
   new THREE.DirectionalLight(
-    '#187bbb',
-    0.94,
+    '#718994',
+    0.32,
   )
 
 
@@ -337,13 +338,34 @@ scene.add(
 )
 
 
+// A weak rear moon-bounce separates tree silhouettes and the side returns
+// without introducing a second visible lighting language.
+const moonRim =
+  new THREE.DirectionalLight(
+    '#c6e0e8',
+    0.36,
+  )
+
+
+moonRim.position.set(
+  9,
+  8,
+  -5,
+)
+
+
+scene.add(
+  moonRim,
+)
+
+
 // --------------------------------------------------
 // Luz cálida cerca de recepción
 // --------------------------------------------------
 
 const entranceLight =
   new THREE.PointLight(
-    '#ffb36b',
+    '#ffd0a0',
     0.78,
     12,
     2,
@@ -627,7 +649,7 @@ const mountainFar =
 
     new THREE.MeshBasicMaterial({
       color:
-        '#122538',
+        '#1b2932',
 
       transparent:
         true,
@@ -676,7 +698,7 @@ const mountainMid =
 
     new THREE.MeshBasicMaterial({
       color:
-        '#0b1927',
+        '#111f28',
 
       transparent:
         true,
@@ -725,7 +747,7 @@ const mountainNear =
 
     new THREE.MeshBasicMaterial({
       color:
-        '#07111b',
+        '#0a141b',
 
       transparent:
         true,
@@ -861,13 +883,13 @@ const floor =
 
     new THREE.MeshStandardMaterial({
       color:
-        '#040b12',
+        '#0a1014',
 
       roughness:
-        0.86,
+        0.9,
 
       metalness:
-        0.07,
+        0.05,
     }),
 
   )
@@ -885,6 +907,16 @@ floor.receiveShadow =
 scene.add(
   floor,
 )
+
+
+// ==================================================
+// COURTYARD / EXTERIOR INMEDIATO
+// ==================================================
+
+const courtyard =
+  new BellaCourtyard(
+    scene,
+  )
 
 
 // ==================================================
@@ -2345,16 +2377,16 @@ function animate(
   // --------------------------------------------------
 
   blueFill.intensity =
-    0.91 +
+    0.32 +
     Math.sin(
       elapsed *
       0.35,
     ) *
-      0.045
+      0.018
 
 
   entranceLight.intensity =
-    0.78 +
+    0.84 +
     Math.sin(
       elapsed *
       1.1,
@@ -2363,7 +2395,7 @@ function animate(
 
 
   moonLight.intensity =
-    2.13 +
+    2.5 +
     Math.sin(
       elapsed *
       0.18,
@@ -2427,6 +2459,8 @@ function animate(
       nightSky.debugState,
     rain:
       rain.debugState,
+    courtyard:
+      courtyard.debugState,
   })
 
 
@@ -2554,6 +2588,11 @@ function resize():
 
 
   bellaWordmark.resize(
+    cameraViewport,
+  )
+
+
+  courtyard.updateViewport(
     cameraViewport,
   )
 }
