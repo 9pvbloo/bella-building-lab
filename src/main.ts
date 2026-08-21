@@ -9,6 +9,7 @@ import { ScrollDirector } from './core/ScrollDirector'
 import { BellaWordmark } from './typography/BellaWordmark'
 import { Atmosphere } from './world/Atmosphere'
 import { Moon } from './world/Moon'
+import { NightSky } from './world/NightSky'
 
 
 // ==================================================
@@ -349,137 +350,13 @@ scene.add(
 
 
 // ==================================================
-// ESTRELLAS
+// CIELO NOCTURNO
 // ==================================================
 
-function createStars():
-  THREE.Points {
-
-  const random =
-    seededRandom(
-      20260817,
-    )
-
-
-  const count =
-    72
-
-
-  const positions =
-    new Float32Array(
-      count *
-      3,
-    )
-
-
-  for (
-    let i =
-      0;
-    i <
-      count;
-    i += 1
-  ) {
-
-    const index =
-      i *
-      3
-
-
-    positions[
-      index
-    ] =
-      THREE.MathUtils.lerp(
-        -45,
-        45,
-        random(),
-      )
-
-
-    positions[
-      index +
-      1
-    ] =
-      THREE.MathUtils.lerp(
-        9,
-        38,
-        random(),
-      )
-
-
-    positions[
-      index +
-      2
-    ] =
-      THREE.MathUtils.lerp(
-        -72,
-        -45,
-        random(),
-      )
-
-  }
-
-
-  const geometry =
-    new THREE.BufferGeometry()
-
-
-  geometry.setAttribute(
-    'position',
-
-    new THREE.BufferAttribute(
-      positions,
-      3,
-    ),
+const nightSky =
+  new NightSky(
+    scene,
   )
-
-
-  const material =
-    new THREE.PointsMaterial({
-      color:
-        '#c8e7f8',
-
-      size:
-        0.055,
-
-      transparent:
-        true,
-
-      opacity:
-        0.44,
-
-      sizeAttenuation:
-        true,
-
-      depthWrite:
-        false,
-
-      fog:
-        false,
-    })
-
-
-  const stars =
-    new THREE.Points(
-      geometry,
-      material,
-    )
-
-
-  stars.name =
-    'BellaStars'
-
-
-  return stars
-}
-
-
-const stars =
-  createStars()
-
-
-scene.add(
-  stars,
-)
 
 
 // ==================================================
@@ -2088,16 +1965,6 @@ function updateBackgroundParallax(
   })
 
 
-  // --------------------------------------------------
-  // Estrellas
-  // --------------------------------------------------
-
-  stars.rotation.y =
-    (
-      normalized -
-      0.5
-    ) *
-    0.006
 }
 
 
@@ -2381,6 +2248,20 @@ function animate(
 
 
   // --------------------------------------------------
+  // Cielo nocturno
+  // --------------------------------------------------
+
+  nightSky.update({
+    elapsed,
+    camera,
+    prefersReducedMotion:
+      runtimePreferences.prefersReducedMotion,
+    isDocumentVisible:
+      runtimePreferences.isDocumentVisible,
+  })
+
+
+  // --------------------------------------------------
   // Luces
   // --------------------------------------------------
 
@@ -2463,6 +2344,8 @@ function animate(
       rendererInfo.memory.textures,
     programs:
       programCount,
+    nightSky:
+      nightSky.debugState,
   })
 
 

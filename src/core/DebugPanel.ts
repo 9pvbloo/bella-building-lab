@@ -20,6 +20,12 @@ export type DebugPanelSnapshot = {
   triangles: number
   textures: number
   programs: number
+  nightSky: {
+    visibleStarCount: number
+    activeShootingStarCount: number
+    pendingShootingStarCount: number
+    secondsUntilNextShootingStarEvent: number
+  }
 }
 
 
@@ -104,6 +110,7 @@ export class DebugPanel {
       `frame ${format(snapshot.frameTime, 1)}ms · ${format(snapshot.fps, 1)}fps`,
       `calls ${snapshot.renderCalls} · tris ${snapshot.triangles}`,
       `textures ${snapshot.textures} · programs ${snapshot.programs}`,
+      `sky ${snapshot.nightSky.visibleStarCount} stars · shooting ${snapshot.nightSky.activeShootingStarCount}/4 · queue ${snapshot.nightSky.pendingShootingStarCount} · next ${format(snapshot.nightSky.secondsUntilNextShootingStarEvent, 1)}s`,
     ].join(
       '\n',
     )
