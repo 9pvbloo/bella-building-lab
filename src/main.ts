@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import './style.css'
 
 import { BellaBuilding } from './building/BellaBuilding'
+import { CameraDirector } from './camera/CameraDirector'
 import { DebugPanel } from './core/DebugPanel'
 import { RuntimePreferences } from './core/RuntimePreferences'
 import { ScrollDirector } from './core/ScrollDirector'
@@ -1006,145 +1007,6 @@ const atmosphere =
   )
 
 // ==================================================
-// CÁMARAS POR CAPÍTULO
-// ==================================================
-
-type CameraState = {
-
-  position:
-    THREE.Vector3
-
-  target:
-    THREE.Vector3
-
-  fov:
-    number
-
-  rotation:
-    number
-}
-
-
-const cameraStates:
-  CameraState[] = [
-
-  // --------------------------------------------------
-  // 00 · HERO
-  // --------------------------------------------------
-
-  {
-    position:
-      new THREE.Vector3(
-        3.4,
-        6.1,
-        17.3,
-      ),
-
-    target:
-      new THREE.Vector3(
-        0.55,
-        5.4,
-        0,
-      ),
-
-    fov:
-      34,
-
-    rotation:
-      THREE.MathUtils.degToRad(
-        -1.5,
-      ),
-  },
-
-
-  // --------------------------------------------------
-  // 01 · EXPERIENCIA
-  // --------------------------------------------------
-
-  {
-    position:
-      new THREE.Vector3(
-        5.2,
-        6.7,
-        21.5,
-      ),
-
-    target:
-      new THREE.Vector3(
-        0.7,
-        5.1,
-        0,
-      ),
-
-    fov:
-      36,
-
-    rotation:
-      THREE.MathUtils.degToRad(
-        -3,
-      ),
-  },
-
-
-  // --------------------------------------------------
-  // 02 · HABITACIONES
-  // --------------------------------------------------
-
-  {
-    position:
-      new THREE.Vector3(
-        -3.2,
-        7.1,
-        23.5,
-      ),
-
-    target:
-      new THREE.Vector3(
-        0,
-        5.3,
-        0,
-      ),
-
-    fov:
-      38,
-
-    rotation:
-      THREE.MathUtils.degToRad(
-        2,
-      ),
-  },
-
-
-  // --------------------------------------------------
-  // 03 · FINAL
-  // --------------------------------------------------
-
-  {
-    position:
-      new THREE.Vector3(
-        0,
-        6.2,
-        18.8,
-      ),
-
-    target:
-      new THREE.Vector3(
-        0,
-        5.2,
-        0,
-      ),
-
-    fov:
-      35,
-
-    rotation:
-      0,
-  },
-
-]
-
-
-// ==================================================
 // CHAPTERS HTML
 // ==================================================
 
@@ -1165,6 +1027,12 @@ if (
     'No se encontraron capítulos [data-bella-cam]',
   )
 }
+
+
+const cameraDirector =
+  new CameraDirector(
+    chapters,
+  )
 
 
 // ==================================================
@@ -1276,6 +1144,66 @@ const worldScrimStates:
     focalHeight: 76,
     focalCoreOpacity: 0.30,
     focalSoftOpacity: 0.12,
+  },
+
+
+  {
+    leftOpacity: 0.30,
+    middleOpacity: 0.12,
+    rightOpacity: 0.03,
+    middleStop: 44,
+    rightStop: 77,
+    focalX: 32,
+    focalY: 50,
+    focalWidth: 92,
+    focalHeight: 72,
+    focalCoreOpacity: 0.46,
+    focalSoftOpacity: 0.18,
+  },
+
+
+  {
+    leftOpacity: 0.22,
+    middleOpacity: 0.08,
+    rightOpacity: 0.02,
+    middleStop: 42,
+    rightStop: 76,
+    focalX: 48,
+    focalY: 47,
+    focalWidth: 102,
+    focalHeight: 78,
+    focalCoreOpacity: 0.30,
+    focalSoftOpacity: 0.13,
+  },
+
+
+  {
+    leftOpacity: 0.16,
+    middleOpacity: 0.055,
+    rightOpacity: 0.01,
+    middleStop: 40,
+    rightStop: 76,
+    focalX: 54,
+    focalY: 48,
+    focalWidth: 108,
+    focalHeight: 82,
+    focalCoreOpacity: 0.20,
+    focalSoftOpacity: 0.08,
+  },
+
+
+  {
+    leftOpacity: 0.42,
+    middleOpacity: 0.16,
+    rightOpacity: 0.03,
+    middleStop: 42,
+    rightStop: 74,
+    focalX: 38,
+    focalY: 56,
+    focalWidth: 88,
+    focalHeight: 68,
+    focalCoreOpacity: 0.32,
+    focalSoftOpacity: 0.15,
   },
 
 ]
@@ -1501,6 +1429,18 @@ const fgTree =
   )
 
 
+const heroCopy =
+  document.querySelector<HTMLElement>(
+    '.bella-hero-copy',
+  )
+
+
+const experienceCopy =
+  document.querySelector<HTMLElement>(
+    '.bella-experience-copy',
+  )
+
+
 let currentActiveChapter =
   -1
 
@@ -1553,11 +1493,12 @@ function updateActiveChapter(
 
 
   // --------------------------------------------------
-  // Capítulo experiencia
+  // Hero y experiencia mantienen el foreground preparado. La visibilidad de
+  // Hero → Experiencia se resuelve con progreso visual en el loop de render.
   // --------------------------------------------------
 
   if (
-    activeIndex ===
+    activeIndex <=
     1
   ) {
 
@@ -1643,98 +1584,154 @@ let smoothProgress =
   0
 
 
-const currentPosition =
-  new THREE.Vector3()
-
-
 const currentTarget =
   new THREE.Vector3()
 
 
+const heroPointerTarget =
+  new THREE.Vector2()
+
+
+const heroPointerVisual =
+  new THREE.Vector2()
+
+
+function resetHeroPointer():
+  void {
+
+  heroPointerTarget.set(
+    0,
+    0,
+  )
+}
+
+
+window.addEventListener(
+  'pointermove',
+  (
+    event,
+  ) => {
+
+    if (
+      runtimePreferences.prefersReducedMotion
+    ) {
+      return
+    }
+
+
+    heroPointerTarget.set(
+      clamp(
+        event.clientX /
+          window.innerWidth *
+          2 -
+          1,
+        -1,
+        1,
+      ),
+      clamp(
+        event.clientY /
+          window.innerHeight *
+          2 -
+          1,
+        -1,
+        1,
+      ),
+    )
+  },
+  {
+    passive: true,
+  },
+)
+
+
+window.addEventListener(
+  'blur',
+  resetHeroPointer,
+)
+
+
 function updateCamera(
   progress: number,
+  activeChapterIndex: number,
+  delta: number,
 ): void {
 
-  const maxIndex =
-    cameraStates.length -
-    1
-
-
-  const clampedProgress =
-    clamp(
-      progress,
-      0,
-      maxIndex,
-    )
-
-
-  const startIndex =
-    Math.floor(
-      clampedProgress,
-    )
-
-
-  const endIndex =
-    Math.min(
-      startIndex +
-      1,
-
-      maxIndex,
-    )
-
-
-  const localProgress =
-    clampedProgress -
-    startIndex
-
-
-  const eased =
-    localProgress *
-    localProgress *
-    (
-      3 -
-      2 *
-      localProgress
-    )
-
-
-  const start =
-    cameraStates[
-      startIndex
-    ]
-
-
-  const end =
-    cameraStates[
-      endIndex
-    ]
-
-
-  // --------------------------------------------------
-  // Posición
-  // --------------------------------------------------
-
-  currentPosition.lerpVectors(
-    start.position,
-    end.position,
-    eased,
-  )
+  const frame =
+    cameraDirector.update({
+      smoothProgress: progress,
+      activeChapterIndex,
+      aspect: camera.aspect,
+    })
 
 
   camera.position.copy(
-    currentPosition,
+    frame.position,
   )
 
 
-  // --------------------------------------------------
-  // Look target
-  // --------------------------------------------------
-
-  currentTarget.lerpVectors(
-    start.target,
-    end.target,
-    eased,
+  currentTarget.copy(
+    frame.target,
   )
+
+
+  const heroPointerInfluence =
+    runtimePreferences.prefersReducedMotion
+      ? 0
+      : 1 -
+        THREE.MathUtils.smoothstep(
+          progress,
+          0.04,
+          0.48,
+        )
+
+
+  heroPointerVisual.x =
+    damp(
+      heroPointerVisual.x,
+      heroPointerTarget.x,
+      7.5,
+      delta,
+    )
+
+
+  heroPointerVisual.y =
+    damp(
+      heroPointerVisual.y,
+      heroPointerTarget.y,
+      7.5,
+      delta,
+    )
+
+
+  const pointerX =
+    heroPointerVisual.x *
+    heroPointerInfluence
+
+
+  const pointerY =
+    heroPointerVisual.y *
+    heroPointerInfluence
+
+
+  // A restrained Hero-only camera drift preserves authored shot ownership.
+  camera.position.x +=
+    pointerX *
+    0.32
+
+
+  camera.position.y -=
+    pointerY *
+    0.16
+
+
+  currentTarget.x +=
+    pointerX *
+    0.09
+
+
+  currentTarget.y -=
+    pointerY *
+    0.045
 
 
   camera.lookAt(
@@ -1742,31 +1739,11 @@ function updateCamera(
   )
 
 
-  // --------------------------------------------------
-  // FOV
-  // --------------------------------------------------
-
   camera.fov =
-    THREE.MathUtils.lerp(
-      start.fov,
-      end.fov,
-      eased,
-    )
+    frame.fov
 
 
   camera.updateProjectionMatrix()
-
-
-  // --------------------------------------------------
-  // Giro ligero edificio
-  // --------------------------------------------------
-
-  building.rotation.y =
-    THREE.MathUtils.lerp(
-      start.rotation,
-      end.rotation,
-      eased,
-    )
 }
 
 
@@ -1777,6 +1754,61 @@ function updateCamera(
 function updateForegroundParallax(
   progress: number,
 ): void {
+
+  const setReveal = (
+    element: HTMLElement | null,
+    start: number,
+    end: number,
+  ): void => {
+
+    if (
+      !element
+    ) {
+      return
+    }
+
+
+    element.style.setProperty(
+      '--fg-hero-reveal',
+      THREE.MathUtils.smoothstep(
+        progress,
+        start,
+        end,
+      ).toFixed(
+        3,
+      ),
+    )
+  }
+
+
+  foreground?.classList.toggle(
+    'is-hero-revealing',
+    progress <
+      0.999,
+  )
+
+
+  // The poster-like Hero stays clean at rest. Existing foreground layers
+  // begin once the user has left it, then arrive in their Experience state.
+  setReveal(
+    fgBranch,
+    0.28,
+    0.70,
+  )
+
+
+  setReveal(
+    fgGarden,
+    0.38,
+    0.82,
+  )
+
+
+  setReveal(
+    fgTree,
+    0.48,
+    0.92,
+  )
 
   const local =
     clamp(
@@ -1899,6 +1931,82 @@ function updateForegroundParallax(
 
 
 // ==================================================
+// HERO / EXPERIENCIA COPY CHOREOGRAPHY
+// ==================================================
+
+function updateIntroCopyChoreography(
+  progress: number,
+): void {
+
+  const heroVisibility =
+    1 -
+    THREE.MathUtils.smoothstep(
+      progress,
+      0.08,
+      0.42,
+    )
+
+
+  const experienceVisibility =
+    THREE.MathUtils.smoothstep(
+      progress,
+      0.84,
+      0.99,
+    )
+
+
+  const setCopyState = (
+    element: HTMLElement | null,
+    visibility: number,
+    startY: number,
+  ): void => {
+
+    if (
+      !element
+    ) {
+      return
+    }
+
+
+    element.style.setProperty(
+      '--bella-copy-opacity',
+      visibility.toFixed(
+        3,
+      ),
+    )
+
+
+    element.style.setProperty(
+      '--bella-copy-y',
+      `${
+        THREE.MathUtils.lerp(
+          startY,
+          0,
+          visibility,
+        )
+      }px`,
+    )
+  }
+
+
+  // Both directions come from the same continuous visual progress. Hero copy
+  // clears first; Experience becomes readable after the title is ghosted.
+  setCopyState(
+    heroCopy,
+    heroVisibility,
+    -18,
+  )
+
+
+  setCopyState(
+    experienceCopy,
+    experienceVisibility,
+    20,
+  )
+}
+
+
+// ==================================================
 // FONDO · MONTAÑAS + LUNA
 // ==================================================
 
@@ -1911,7 +2019,7 @@ function updateBackgroundParallax(
   const normalized =
     clamp(
       progress /
-      3,
+      6,
 
       0,
 
@@ -2218,6 +2326,8 @@ function animate(
 
   updateCamera(
     smoothProgress,
+    scrollDirector.activeChapterIndex,
+    delta,
   )
 
 
@@ -2226,6 +2336,11 @@ function animate(
   // --------------------------------------------------
 
   updateForegroundParallax(
+    smoothProgress,
+  )
+
+
+  updateIntroCopyChoreography(
     smoothProgress,
   )
 

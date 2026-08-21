@@ -47,17 +47,43 @@ const GLYPH_STAGGER = 0.07
 const GLYPH_REVEAL_DURATION = 0.55
 
 
+const HERO_INTRO_DURATION = 1.45
+
+
+const HERO_INTRO_SCALE = 0.90
+
+
+const HERO_INTRO_DEPTH_OFFSET = 2.2
+
+
+const BELLA_LINE_WIDTH_SCALE = 1.36
+
+
+const DURMIENTE_LINE_WIDTH_SCALE = 1.08
+
+
 const FINAL_OPACITY = 0.94
 
 
-const REST_POSITION_X = 2.20
+const THRESHOLD_OPACITY_MULTIPLIER = 0.86
 
 
-const REST_POSITION_Y = 2.75
+const THRESHOLD_FADE_START_PROGRESS = 0.78
 
 
-const RETIRED_POSITION_Y = 2.25
+const THRESHOLD_FADE_END_PROGRESS = 1
 
+
+const HERO_THRESHOLD_DEPTH = 11.5
+
+
+const HERO_THRESHOLD_SCALE_COMPENSATION = 0.618
+
+
+const HERO_THRESHOLD_POSITION_X = 0.81
+
+
+const HERO_THRESHOLD_POSITION_Y = 2.61
 
 const FONT_CANDIDATES = [
   '"Bodoni MT"',
@@ -94,7 +120,7 @@ const smoothstep = (
 
 /**
  * The Hero wordmark is a world-space typographic composition. Individual
- * glyph planes keep its optical spacing, reveal, and retirement independent
+ * glyph planes keep its optical spacing, reveal, and threshold traversal
  * without turning it into a viewport overlay.
  */
 export class BellaWordmark {
@@ -134,6 +160,10 @@ export class BellaWordmark {
     number | undefined
 
 
+  private layoutScale =
+    1
+
+
   constructor(
     renderer: THREE.WebGLRenderer,
   ) {
@@ -149,7 +179,7 @@ export class BellaWordmark {
     this.bellaLine =
       this.createLine({
         text: 'BELLA',
-        glyphHeight: 2.12,
+        glyphHeight: 4.25,
         tracking: 0.20,
         y: 2.59,
         startIndex: 0,
@@ -160,8 +190,8 @@ export class BellaWordmark {
     this.durmienteLine =
       this.createLine({
         text: 'DURMIENTE',
-        glyphHeight: 2.34,
-        tracking: 0.14,
+        glyphHeight: 2.48,
+        tracking: 0.16,
         y: -0.01,
         startIndex: 5,
         renderer,
@@ -170,7 +200,17 @@ export class BellaWordmark {
 
     // Keep the supporting line clear of the Hero's upper-left editorial copy.
     this.bellaLine.group.position.x =
-      0.90
+      0
+
+
+    // Each line deliberately overshoots the Hero frame horizontally while
+    // preserving its authored vertical proportions in world space.
+    this.bellaLine.group.scale.x =
+      BELLA_LINE_WIDTH_SCALE
+
+
+    this.durmienteLine.group.scale.x =
+      DURMIENTE_LINE_WIDTH_SCALE
 
 
     this.group.add(
@@ -181,16 +221,17 @@ export class BellaWordmark {
 
     /*
       Hotel ≈ z 0
-      Wordmark = z 4.35
-      Camera Hero ≈ z 17
+      Hero wordmark threshold = z 11.5
+      Camera Hero ≈ z 23
 
-      The lower middle layout keeps both lines inside the Hero frame, clear of
-      the editorial copy, while retaining the established facade depth.
+      The centered lower-middle layout keeps the monumental two-line lockup
+      clear of the editorial copy. Its smaller physical scale compensates for
+      the forward threshold depth, preserving the approved Hero projection.
     */
     this.group.position.set(
-      REST_POSITION_X,
-      REST_POSITION_Y,
-      4.35,
+      HERO_THRESHOLD_POSITION_X,
+      HERO_THRESHOLD_POSITION_Y,
+      HERO_THRESHOLD_DEPTH,
     )
   }
 
@@ -251,43 +292,54 @@ export class BellaWordmark {
     }
 
 
-    const retirement =
+    const thresholdFade =
       smoothstep(
-        THREE.MathUtils.clamp(
-          wordmarkProgress /
-          0.92,
-          0,
-          1,
+        (
+          wordmarkProgress -
+          THRESHOLD_FADE_START_PROGRESS
+        ) /
+        (
+          THRESHOLD_FADE_END_PROGRESS -
+          THRESHOLD_FADE_START_PROGRESS
         ),
       )
 
 
+    const introElapsed =
+      elapsed -
+      this.introStartedAt
+
+
+    const heroIntro =
+      prefersReducedMotion
+        ? 1
+        : smoothstep(
+            introElapsed /
+            HERO_INTRO_DURATION,
+          )
+
+
     const scrollVisibility =
-      1 -
-      smoothstep(
-        (
-          retirement -
-          0.48
-        ) /
-        0.52,
-      )
-
-
-    // The full composition retires as one quiet world element.
-    this.group.position.y =
       THREE.MathUtils.lerp(
-        REST_POSITION_Y,
-        RETIRED_POSITION_Y,
-        retirement,
+        1,
+        THRESHOLD_OPACITY_MULTIPLIER,
+        thresholdFade,
       )
+
+
+    // The threshold never retreats behind Bella. Its page-load settling stays
+    // separate; scroll retirement is caused by the camera crossing this plane.
+    this.group.position.y =
+      HERO_THRESHOLD_POSITION_Y
 
 
     this.group.position.z =
-      THREE.MathUtils.lerp(
-        4.35,
-        4.74,
-        retirement,
-      )
+      HERO_THRESHOLD_DEPTH -
+      (
+        1 -
+        heroIntro
+      ) *
+      HERO_INTRO_DEPTH_OFFSET
 
 
     this.group.rotation.set(
@@ -297,22 +349,24 @@ export class BellaWordmark {
     )
 
 
-    // A very small vertical opening supports retirement without a split.
+    // Keep the two lines locked as one threshold during the crossing.
     this.bellaLine.group.position.y =
-      this.bellaLine.baseY +
-      0.08 *
-      retirement
+      this.bellaLine.baseY
 
 
     this.durmienteLine.group.position.y =
-      this.durmienteLine.baseY -
-      0.08 *
-      retirement
+      this.durmienteLine.baseY
 
 
-    const introElapsed =
-      elapsed -
-      this.introStartedAt
+    // The whole Hero lockup settles forward once, without leaving world space.
+    this.group.scale.setScalar(
+      this.layoutScale *
+      THREE.MathUtils.lerp(
+        HERO_INTRO_SCALE,
+        1,
+        heroIntro,
+      ),
+    )
 
 
     this.glyphs.forEach(
@@ -362,9 +416,6 @@ export class BellaWordmark {
     )
 
 
-    this.group.visible =
-      scrollVisibility >
-      0.01
   }
 
 
@@ -372,13 +423,13 @@ export class BellaWordmark {
     aspect: number,
   ): void {
 
-    const scale =
+    const desktopScale =
       Math.min(
-        0.74,
+        1.10,
         Math.max(
           0.15,
           aspect *
-          0.34,
+          0.61,
         ),
       )
 
@@ -393,17 +444,31 @@ export class BellaWordmark {
       )
 
 
+    // Phase 6 will author mobile wordmark composition. Until then, retain a
+    // modest narrow-screen safeguard while allowing the desktop lockup to be
+    // genuinely monumental.
+    const scale =
+      THREE.MathUtils.lerp(
+        desktopScale,
+        Math.min(
+          desktopScale,
+          0.18,
+        ),
+        narrowness,
+      )
+
+
     this.group.position.x =
       THREE.MathUtils.lerp(
-        REST_POSITION_X,
+        HERO_THRESHOLD_POSITION_X,
         1.55,
         narrowness,
       )
 
 
-    this.group.scale.setScalar(
-      scale,
-    )
+    this.layoutScale =
+      scale *
+      HERO_THRESHOLD_SCALE_COMPENSATION
   }
 
 

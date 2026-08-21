@@ -956,42 +956,72 @@ export class Moon {
       {
         position:
           new THREE.Vector3(
-            -30,
-            13,
+            22,
+            26,
             -55,
           ),
         diameter:
-          13.8,
+          16.5,
       },
       {
         position:
           new THREE.Vector3(
-            -30,
-            13,
+            22,
+            26,
             -55,
           ),
         diameter:
-          13.8,
+          16.5,
       },
       {
         position:
           new THREE.Vector3(
-            -30,
-            13,
+            22,
+            26,
             -55,
           ),
         diameter:
-          13.8,
+          16.5,
       },
       {
         position:
           new THREE.Vector3(
-            -30,
-            13,
+            22,
+            26,
             -55,
           ),
         diameter:
-          13.8,
+          16.5,
+      },
+      {
+        position:
+          new THREE.Vector3(
+            22,
+            26,
+            -55,
+          ),
+        diameter:
+          16.5,
+      },
+      {
+        position:
+          new THREE.Vector3(
+            22,
+            26,
+            -55,
+          ),
+        diameter:
+          16.5,
+      },
+      {
+        position:
+          new THREE.Vector3(
+            22,
+            26,
+            -55,
+          ),
+        diameter:
+          16.5,
       },
     ]
 
@@ -1003,9 +1033,9 @@ export class Moon {
       {
         position:
           new THREE.Vector3(
-            6.318,
-            11.437,
-            -34.111,
+            7.2,
+            20,
+            -34,
           ),
         diameter:
           8.5,
@@ -1013,32 +1043,62 @@ export class Moon {
       {
         position:
           new THREE.Vector3(
-            6.555,
-            10.845,
-            -30.311,
+            7,
+            19.5,
+            -31,
           ),
         diameter:
-          9.04,
+          8.5,
       },
       {
         position:
           new THREE.Vector3(
-            16.15,
-            11.556,
-            -24.813,
+            9,
+            19,
+            -29,
           ),
         diameter:
-          9.58,
+          8.7,
       },
       {
         position:
           new THREE.Vector3(
-            11.587,
-            11.101,
-            -31.531,
+            8.5,
+            19,
+            -31,
           ),
         diameter:
-          8.77,
+          8.2,
+      },
+      {
+        position:
+          new THREE.Vector3(
+            8,
+            19.5,
+            -31,
+          ),
+        diameter:
+          8.3,
+      },
+      {
+        position:
+          new THREE.Vector3(
+            7.7,
+            20,
+            -32,
+          ),
+        diameter:
+          8,
+      },
+      {
+        position:
+          new THREE.Vector3(
+            7.2,
+            19.5,
+            -32,
+          ),
+        diameter:
+          8.3,
       },
     ]
 
@@ -1047,42 +1107,72 @@ export class Moon {
       {
         position:
           new THREE.Vector3(
-            2.062,
-            11.437,
-            -33.41,
+            4.5,
+            20,
+            -20,
           ),
         diameter:
-          8.5,
+          6,
       },
       {
         position:
           new THREE.Vector3(
-            2.069,
-            10.845,
-            -29.372,
+            8.1,
+            19.4,
+            -30,
           ),
         diameter:
-          9.04,
+          8.7,
       },
       {
         position:
           new THREE.Vector3(
-            11.336,
-            11.556,
-            -25.468,
+            8.7,
+            19,
+            -26,
           ),
         diameter:
-          9.58,
+          8.7,
       },
       {
         position:
           new THREE.Vector3(
-            7.139,
-            11.101,
-            -31.531,
+            8.4,
+            19,
+            -31,
           ),
         diameter:
-          8.77,
+          8,
+      },
+      {
+        position:
+          new THREE.Vector3(
+            8.2,
+            19.5,
+            -31,
+          ),
+        diameter:
+          8.1,
+      },
+      {
+        position:
+          new THREE.Vector3(
+            8,
+            20,
+            -32,
+          ),
+        diameter:
+          7.8,
+      },
+      {
+        position:
+          new THREE.Vector3(
+            8,
+            19.5,
+            -32,
+          ),
+        diameter:
+          8.1,
       },
     ]
 

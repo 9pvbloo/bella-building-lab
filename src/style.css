@@ -292,12 +292,40 @@ body {
   align-items: center;
 }
 
+.bella-hero-copy,
+.bella-hero .bella-scroll-cue {
+  display: none;
+}
+
 .bella-hero-copy {
   width:
     min(
       720px,
       48vw
     );
+}
+
+.bella-hero-copy,
+.bella-experience-copy {
+  opacity:
+    var(
+      --bella-copy-opacity,
+      1
+    );
+
+  transform:
+    translate3d(
+      0,
+      var(
+        --bella-copy-y,
+        0px
+      ),
+      0
+    );
+
+  will-change:
+    opacity,
+    transform;
 }
 
 .bella-hero h1 {
@@ -812,6 +840,43 @@ body {
 
 
 /* ==================================================
+   CHAPTERS 03–05 · CAMERA LEDGER SUPPORT
+   ================================================== */
+
+.bella-content-copy {
+  width:
+    min(
+      660px,
+      52vw
+    );
+}
+
+.bella-services {
+  min-height: 118vh;
+}
+
+.bella-gallery {
+  min-height: 120vh;
+
+  justify-content: flex-end;
+}
+
+.bella-gallery-copy {
+  margin-left: auto;
+
+  text-align: right;
+}
+
+.bella-gallery-copy .bella-body {
+  margin-left: auto;
+}
+
+.bella-location {
+  min-height: 118vh;
+}
+
+
+/* ==================================================
    ENDING
    ================================================== */
 
@@ -858,6 +923,10 @@ body {
       250,
       0.60
     );
+}
+
+.bella-ending-actions {
+  justify-content: center;
 }
 
 
@@ -911,7 +980,8 @@ body {
 ) {
 
   .bella-hero-copy,
-  .bella-experience-copy {
+  .bella-experience-copy,
+  .bella-content-copy {
     width: 75%;
   }
 
@@ -943,8 +1013,23 @@ body {
   }
 
   .bella-hero-copy,
-  .bella-experience-copy {
+  .bella-experience-copy,
+  .bella-content-copy {
     width: 100%;
+  }
+
+  .bella-gallery {
+    justify-content: flex-start;
+  }
+
+  .bella-gallery-copy {
+    margin-left: 0;
+
+    text-align: left;
+  }
+
+  .bella-gallery-copy .bella-body {
+    margin-left: 0;
   }
 
   .bella-hero h1 {
@@ -1207,6 +1292,26 @@ body {
 
 
 /*
+   Hero begins as a clean poster. Smooth visual progress owns this reveal, so
+   the foliage reverses exactly with the camera rather than popping on a
+   chapter-class boundary.
+*/
+.bella-fg-stage.is-hero-revealing
+.bella-fg-el {
+  opacity:
+    var(
+      --fg-hero-reveal,
+      0
+    );
+
+  transition:
+    none;
+
+  transition-delay: 0ms;
+}
+
+
+/*
    Igual que nuestra referencia conceptual:
    cada elemento entra ligeramente después.
 */
@@ -1337,6 +1442,11 @@ body {
     transition: none !important;
 
     transform: none !important;
+  }
+
+  .bella-hero-copy,
+  .bella-experience-copy {
+    transform: none;
   }
 
   .bella-fg-stage.is-active
