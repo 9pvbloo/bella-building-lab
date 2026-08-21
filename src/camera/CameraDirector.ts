@@ -16,13 +16,27 @@ export type CameraFrame = {
   target: THREE.Vector3
   fov: number
   activeShot: CameraShot
+  profile: CameraCompositionProfile
+}
+
+
+export type CameraCompositionProfile =
+  | 'desktop'
+  | 'tablet'
+  | 'phone'
+
+
+export type CameraViewport = {
+  width: number
+  height: number
+  aspect: number
 }
 
 
 export type CameraDirectorUpdate = {
   smoothProgress: number
   activeChapterIndex: number
-  aspect: number
+  viewport: CameraViewport
 }
 
 
@@ -58,52 +72,78 @@ const POST_EXPERIENCE_MAX_Z =
   10.6
 
 
+type CameraProfileLedger = {
+  id: CameraCompositionProfile
+  shots: readonly CameraShot[]
+  heroThresholdApproach: CameraShot
+  experienceToRoomsDeparture: CameraShot
+  servicesToGalleryReveal: CameraShot
+  locationToReserveArrival: CameraShot
+}
+
+
 /**
- * Owns Bella's authored desktop camera ledger. Native scroll selects the
- * exact chapter elsewhere; only the already-smoothed visual progress is used
- * here to interpolate the persistent camera between its seven front-facing
- * compositions.
+ * Selects a semantic authored composition family once per camera update. The
+ * width guard keeps 768 × 1024 in the tablet family, while a phone rotated
+ * into a broad landscape can remain close to the approved desktop framing.
  */
-export class CameraDirector {
+export function resolveCameraCompositionProfile(
+  {
+    width,
+    aspect,
+  }: CameraViewport,
+): CameraCompositionProfile {
 
-  private readonly heroThresholdApproach: CameraShot = {
-    id: 'hero-threshold-approach',
-    label: 'Hero threshold approach',
-    composition: 'Forward approach to the Hero wordmark threshold.',
-    position: new THREE.Vector3(1.95, 4.15, 14.65),
-    target: new THREE.Vector3(0.81, 3.55, 10.5),
-    fov: 37.5,
+  if (
+    width <=
+    700 &&
+    aspect <
+      1.1
+  ) {
+    return 'phone'
   }
 
-  private readonly experienceToRoomsDeparture: CameraShot = {
-    id: 'experience-to-rooms-departure',
-    label: 'Experience to rooms departure',
-    composition: 'A front-facing lateral departure that begins the room discovery.',
-    position: new THREE.Vector3(-3.6, 5.85, 9.8),
-    target: new THREE.Vector3(-0.65, 5.8, 0),
-    fov: 44,
+
+  if (
+    width <=
+    1100 &&
+    aspect <=
+      1.55
+  ) {
+    return 'tablet'
   }
 
-  private readonly servicesToGalleryReveal: CameraShot = {
-    id: 'services-to-gallery-reveal',
-    label: 'Services to gallery reveal',
-    composition: 'A mid-distance cross-facade reveal that preserves the known front.',
-    position: new THREE.Vector3(1.1, 8.65, 10.4),
-    target: new THREE.Vector3(-0.8, 6.5, 0),
-    fov: 46,
-  }
 
-  private readonly locationToReserveArrival: CameraShot = {
-    id: 'location-to-reserve-arrival',
-    label: 'Location to reserve arrival',
-    composition: 'A measured descending approach that turns the return toward reception.',
-    position: new THREE.Vector3(7.2, 7.4, 10.2),
-    target: new THREE.Vector3(-0.4, 3.8, 0.6),
-    fov: 47,
-  }
+  return 'desktop'
+}
 
-  readonly shots:
-    readonly CameraShot[] = [
+
+const cameraShot = (
+  id: string,
+  label: string,
+  composition: string,
+  position: readonly [number, number, number],
+  target: readonly [number, number, number],
+  fov: number,
+): CameraShot => ({
+  id,
+  label,
+  composition,
+  position: new THREE.Vector3(...position),
+  target: new THREE.Vector3(...target),
+  fov,
+})
+
+
+const CAMERA_PROFILE_LEDGERS: Readonly<Record<
+  CameraCompositionProfile,
+  CameraProfileLedger
+>> = {
+  // This ledger is intentionally byte-for-byte equivalent in authored values
+  // to the approved desktop journey from Phase 5.
+  desktop: {
+    id: 'desktop',
+    shots: [
 
     {
       id: 'hero',
@@ -168,7 +208,84 @@ export class CameraDirector {
       fov: 40,
     },
 
-  ]
+    ],
+    heroThresholdApproach: cameraShot(
+      'hero-threshold-approach',
+      'Hero threshold approach',
+      'Forward approach to the Hero wordmark threshold.',
+      [1.95, 4.15, 14.65],
+      [0.81, 3.55, 10.5],
+      37.5,
+    ),
+    experienceToRoomsDeparture: cameraShot(
+      'experience-to-rooms-departure',
+      'Experience to rooms departure',
+      'A front-facing lateral departure that begins the room discovery.',
+      [-3.6, 5.85, 9.8],
+      [-0.65, 5.8, 0],
+      44,
+    ),
+    servicesToGalleryReveal: cameraShot(
+      'services-to-gallery-reveal',
+      'Services to gallery reveal',
+      'A mid-distance cross-facade reveal that preserves the known front.',
+      [1.1, 8.65, 10.4],
+      [-0.8, 6.5, 0],
+      46,
+    ),
+    locationToReserveArrival: cameraShot(
+      'location-to-reserve-arrival',
+      'Location to reserve arrival',
+      'A measured descending approach that turns the return toward reception.',
+      [7.2, 7.4, 10.2],
+      [-0.4, 3.8, 0.6],
+      47,
+    ),
+  },
+  tablet: {
+    id: 'tablet',
+    shots: [
+      cameraShot('hero', 'Hero', 'Tighter vertical Hero poster with a protected moon and threshold.', [1, 3.55, 21.6], [0.4, 7.25, 0.15], 41),
+      cameraShot('experience', 'Experiencia', 'A deeper, readable architectural arrival after crossing the title.', [2.5, 4.9, 9.45], [0.25, 5.7, 0], 47),
+      cameraShot('rooms', 'Habitaciones', 'A calm, modest lateral room-card frame with a protected center.', [-5.9, 6.85, 10], [-0.7, 5.8, 0], 50),
+      cameraShot('services', 'Servicios', 'A raised front-facing frame that keeps the elevation signature.', [-4.2, 10.3, 10], [-1.8, 7.6, 0], 50),
+      cameraShot('gallery', 'Galería', 'A controlled side reveal that stays on Bella’s known facade.', [6.2, 6.8, 9.85], [0.4, 5.5, 0], 50),
+      cameraShot('location', 'Huancayo / Ubicación', 'An elevated, wider front view that opens Bella toward the Andes.', [11, 20, 10.5], [1.3, 5, -18], 60),
+      cameraShot('reserve', 'Final / Reserva', 'A lower reception-focused return for the final CTA.', [1.2, 2.6, 9.2], [2.8, 1.8, 0.8], 44),
+    ],
+    heroThresholdApproach: cameraShot('hero-threshold-approach', 'Hero threshold approach', 'Tablet approach to the shared Hero wordmark plane.', [1.5, 4.1, 14.8], [0.7, 3.55, 10.5], 43),
+    experienceToRoomsDeparture: cameraShot('experience-to-rooms-departure', 'Experience to rooms departure', 'Tablet departure from the architectural arrival.', [-2.7, 5.9, 9.7], [-0.45, 5.75, 0], 47),
+    servicesToGalleryReveal: cameraShot('services-to-gallery-reveal', 'Services to gallery reveal', 'Tablet mid-distance cross-facade reveal.', [1, 8.5, 10.25], [-0.4, 6.5, 0], 50),
+    locationToReserveArrival: cameraShot('location-to-reserve-arrival', 'Location to reserve arrival', 'Tablet descent toward the warm reception.', [5.5, 6.9, 10.1], [-0.25, 3.5, 0.6], 48),
+  },
+  phone: {
+    id: 'phone',
+    shots: [
+      cameraShot('hero', 'Hero', 'A monumental portrait facade with a large cropped two-line threshold.', [1.1, 4.4, 20.5], [0.55, 7, 0.1], 49),
+      cameraShot('experience', 'Experiencia', 'A deep, readable architectural arrival on the hotel side of the title.', [2, 5.5, 10.25], [0.3, 5.6, 0], 57),
+      cameraShot('rooms', 'Habitaciones', 'A calm portrait-compatible room-card composition with protected negative space.', [-2.6, 6.5, 9.8], [-0.2, 5.3, 0], 54),
+      cameraShot('services', 'Servicios', 'A controlled vertical crane-up for the service chapter.', [-2.9, 10.6, 9.9], [-1, 7.4, 0], 54),
+      cameraShot('gallery', 'Galería', 'A modest sculptural perspective change on the known facade.', [3.7, 6.9, 9.65], [0.4, 5.3, 0], 53),
+      cameraShot('location', 'Huancayo / Ubicación', 'A high, wider portrait opening that gives the Andes more sky.', [8.5, 23.5, 10.3], [1.2, 5, -25], 70),
+      cameraShot('reserve', 'Final / Reserva', 'An intimate lower-facade return that centers the warm entrance.', [0.9, 2.4, 8.8], [2.1, 1.65, 0.9], 49),
+    ],
+    heroThresholdApproach: cameraShot('hero-threshold-approach', 'Hero threshold approach', 'Phone approach to the shared Hero wordmark plane.', [1.45, 4.65, 14.7], [0.65, 3.8, 10.4], 52),
+    experienceToRoomsDeparture: cameraShot('experience-to-rooms-departure', 'Experience to rooms departure', 'Phone departure with lateral movement held in reserve.', [-1.6, 5.8, 9.55], [-0.2, 5.6, 0], 53),
+    servicesToGalleryReveal: cameraShot('services-to-gallery-reveal', 'Services to gallery reveal', 'Phone cross-facade sculptural reveal.', [0.75, 8.8, 10.2], [-0.2, 6.3, 0], 54),
+    locationToReserveArrival: cameraShot('location-to-reserve-arrival', 'Location to reserve arrival', 'Phone descent from the Andean opening toward reception.', [3.7, 6.5, 9.7], [-0.1, 3.25, 0.6], 51),
+  },
+}
+
+
+/**
+ * Owns Bella's authored desktop, tablet, and phone ledgers. Native scroll
+ * selects exact chapter ownership elsewhere; visual smoothing only
+ * interpolates the persistent camera within the selected semantic profile.
+ */
+export class CameraDirector {
+
+  readonly shots =
+    CAMERA_PROFILE_LEDGERS.desktop.shots
 
 
   private readonly currentPosition =
@@ -238,6 +355,7 @@ export class CameraDirector {
       target: this.currentTarget,
       fov: initialShot.fov,
       activeShot: initialShot,
+      profile: 'desktop',
     }
   }
 
@@ -246,12 +364,23 @@ export class CameraDirector {
     {
       smoothProgress,
       activeChapterIndex,
-      aspect,
+      viewport,
     }: CameraDirectorUpdate,
   ): Readonly<CameraFrame> {
 
+    const profile =
+      resolveCameraCompositionProfile(
+        viewport,
+      )
+
+
+    const ledger =
+      CAMERA_PROFILE_LEDGERS[
+        profile
+      ]
+
     const lastIndex =
-      this.shots.length -
+      ledger.shots.length -
       1
 
 
@@ -285,10 +414,10 @@ export class CameraDirector {
 
 
     let start =
-      this.shots[startIndex]
+      ledger.shots[startIndex]
 
     let end =
-      this.shots[endIndex]
+      ledger.shots[endIndex]
 
 
     if (
@@ -308,11 +437,11 @@ export class CameraDirector {
       ) {
 
         start =
-          this.shots[0]
+          ledger.shots[0]
 
 
         end =
-          this.heroThresholdApproach
+          ledger.heroThresholdApproach
 
 
         eased =
@@ -323,11 +452,11 @@ export class CameraDirector {
       } else {
 
         start =
-          this.heroThresholdApproach
+          ledger.heroThresholdApproach
 
 
         end =
-          this.shots[1]
+          ledger.shots[1]
 
 
         eased =
@@ -360,11 +489,11 @@ export class CameraDirector {
       ) {
 
         start =
-          this.shots[1]
+          ledger.shots[1]
 
 
         end =
-          this.experienceToRoomsDeparture
+          ledger.experienceToRoomsDeparture
 
 
         eased =
@@ -378,11 +507,11 @@ export class CameraDirector {
       } else {
 
         start =
-          this.experienceToRoomsDeparture
+          ledger.experienceToRoomsDeparture
 
 
         end =
-          this.shots[2]
+          ledger.shots[2]
 
 
         eased =
@@ -416,11 +545,11 @@ export class CameraDirector {
       ) {
 
         start =
-          this.shots[3]
+          ledger.shots[3]
 
 
         end =
-          this.servicesToGalleryReveal
+          ledger.servicesToGalleryReveal
 
 
         eased =
@@ -434,11 +563,11 @@ export class CameraDirector {
       } else {
 
         start =
-          this.servicesToGalleryReveal
+          ledger.servicesToGalleryReveal
 
 
         end =
-          this.shots[4]
+          ledger.shots[4]
 
 
         eased =
@@ -472,11 +601,11 @@ export class CameraDirector {
       ) {
 
         start =
-          this.shots[5]
+          ledger.shots[5]
 
 
         end =
-          this.locationToReserveArrival
+          ledger.locationToReserveArrival
 
 
         eased =
@@ -490,11 +619,11 @@ export class CameraDirector {
       } else {
 
         start =
-          this.locationToReserveArrival
+          ledger.locationToReserveArrival
 
 
         end =
-          this.shots[6]
+          ledger.shots[6]
 
 
         eased =
@@ -527,30 +656,7 @@ export class CameraDirector {
     )
 
 
-    // A small front-facing lateral offset leaves room for the persistent moon
-    // beside Bella's narrow mobile facade. It is a safeguard, not the authored
-    // mobile shot system scheduled for Phase 6.
-    const mobileSafety =
-      smoothstep(
-        (
-          0.75 -
-          aspect
-        ) /
-        0.3,
-      )
-
-
-    this.currentPosition.x +=
-      2.5 *
-      mobileSafety
-
-
-    this.currentTarget.x +=
-      1.25 *
-      mobileSafety
-
-
-    const desktopFov =
+    this.frame.fov =
       THREE.MathUtils.lerp(
         start.fov,
         end.fov,
@@ -558,33 +664,19 @@ export class CameraDirector {
       )
 
 
-    // This is only a narrow-screen safety composition. Phase 6 will replace
-    // it with full per-shot mobile positions and targets.
-    this.frame.fov =
-      aspect <
-      0.75
-        ? Math.max(
-            desktopFov,
-            50,
-          )
-        : aspect <
-            0.95
-          ? Math.max(
-              desktopFov,
-              42,
-            )
-          : desktopFov
-
-
     // This is exact chapter metadata only. It never feeds interpolation.
     this.frame.activeShot =
-      this.shots[
+      ledger.shots[
         THREE.MathUtils.clamp(
           activeChapterIndex,
           0,
           lastIndex,
         )
       ]
+
+
+    this.frame.profile =
+      profile
 
 
     return this.frame
@@ -600,37 +692,74 @@ export class CameraDirector {
     }
 
 
-    const insideShots: readonly CameraShot[] = [
-      this.shots[1],
-      this.shots[2],
-      this.shots[3],
-      this.shots[4],
-      this.shots[5],
-      this.shots[6],
-      this.experienceToRoomsDeparture,
-      this.servicesToGalleryReveal,
-      this.locationToReserveArrival,
-    ]
-
-
-    insideShots.forEach(
+    Object.values(
+      CAMERA_PROFILE_LEDGERS,
+    ).forEach(
       (
-        shot,
+        ledger,
       ) => {
 
-        if (
-          shot.position.z >
-          POST_EXPERIENCE_MAX_Z
-        ) {
+        const preThresholdShots: readonly CameraShot[] = [
+          ledger.shots[0],
+          ledger.heroThresholdApproach,
+        ]
 
-          throw new Error(
-            `CameraDirector post-Experiencia shot "${
-              shot.id
-            }" crosses the Hero wordmark threshold at z ${
+
+        preThresholdShots.forEach(
+          (
+            shot,
+          ) => {
+
+            if (
+              shot.position.z <=
               HERO_WORDMARK_THRESHOLD_Z
-            }`,
-          )
-        }
+            ) {
+
+              throw new Error(
+                `CameraDirector ${ledger.id} pre-threshold shot "${
+                  shot.id
+                }" must remain in front of the Hero wordmark plane at z ${
+                  HERO_WORDMARK_THRESHOLD_Z
+                }`,
+              )
+            }
+          },
+        )
+
+
+        const insideShots: readonly CameraShot[] = [
+          ledger.shots[1],
+          ledger.shots[2],
+          ledger.shots[3],
+          ledger.shots[4],
+          ledger.shots[5],
+          ledger.shots[6],
+          ledger.experienceToRoomsDeparture,
+          ledger.servicesToGalleryReveal,
+          ledger.locationToReserveArrival,
+        ]
+
+
+        insideShots.forEach(
+          (
+            shot,
+          ) => {
+
+            if (
+              shot.position.z >
+              POST_EXPERIENCE_MAX_Z
+            ) {
+
+              throw new Error(
+                `CameraDirector ${ledger.id} post-Experiencia shot "${
+                  shot.id
+                }" crosses the Hero wordmark threshold at z ${
+                  HERO_WORDMARK_THRESHOLD_Z
+                }`,
+              )
+            }
+          },
+        )
       },
     )
   }

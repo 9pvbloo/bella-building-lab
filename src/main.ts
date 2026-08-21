@@ -2,7 +2,10 @@ import * as THREE from 'three'
 import './style.css'
 
 import { BellaBuilding } from './building/BellaBuilding'
-import { CameraDirector } from './camera/CameraDirector'
+import {
+  CameraDirector,
+  type CameraViewport,
+} from './camera/CameraDirector'
 import { DebugPanel } from './core/DebugPanel'
 import { RuntimePreferences } from './core/RuntimePreferences'
 import { ScrollDirector } from './core/ScrollDirector'
@@ -156,6 +159,13 @@ const camera =
 
     150,
   )
+
+
+const cameraViewport: CameraViewport = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+  aspect: camera.aspect,
+}
 
 
 /*
@@ -1473,6 +1483,12 @@ const heroPointerVisual =
   new THREE.Vector2()
 
 
+const heroPointerQuery =
+  window.matchMedia(
+    '(any-hover: hover) and (any-pointer: fine)',
+  )
+
+
 function resetHeroPointer():
   void {
 
@@ -1490,7 +1506,8 @@ window.addEventListener(
   ) => {
 
     if (
-      runtimePreferences.prefersReducedMotion
+      runtimePreferences.prefersReducedMotion ||
+      !heroPointerQuery.matches
     ) {
       return
     }
@@ -1527,6 +1544,12 @@ window.addEventListener(
 )
 
 
+heroPointerQuery.addEventListener(
+  'change',
+  resetHeroPointer,
+)
+
+
 function updateCamera(
   progress: number,
   activeChapterIndex: number,
@@ -1537,7 +1560,7 @@ function updateCamera(
     cameraDirector.update({
       smoothProgress: progress,
       activeChapterIndex,
-      aspect: camera.aspect,
+      viewport: cameraViewport,
     })
 
 
@@ -1554,12 +1577,14 @@ function updateCamera(
   const heroPointerInfluence =
     runtimePreferences.prefersReducedMotion
       ? 0
-      : 1 -
-        THREE.MathUtils.smoothstep(
-          progress,
-          0.04,
-          0.48,
-        )
+      : heroPointerQuery.matches
+        ? 1 -
+          THREE.MathUtils.smoothstep(
+            progress,
+            0.04,
+            0.48,
+          )
+        : 0
 
 
   heroPointerVisual.x =
@@ -2442,6 +2467,18 @@ function resize():
     height
 
 
+  cameraViewport.width =
+    width
+
+
+  cameraViewport.height =
+    height
+
+
+  cameraViewport.aspect =
+    camera.aspect
+
+
   camera.updateProjectionMatrix()
 
 
@@ -2461,7 +2498,7 @@ function resize():
 
 
   bellaWordmark.resize(
-    camera.aspect,
+    cameraViewport,
   )
 }
 

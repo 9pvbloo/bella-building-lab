@@ -1,4 +1,8 @@
 import * as THREE from 'three'
+import {
+  resolveCameraCompositionProfile,
+  type CameraViewport,
+} from '../camera/CameraDirector'
 
 
 type GlyphTexture = {
@@ -60,6 +64,14 @@ const BELLA_LINE_WIDTH_SCALE = 1.36
 
 
 const DURMIENTE_LINE_WIDTH_SCALE = 1.08
+
+
+// Phone keeps the lockup oversized, but its longer supporting line needs a
+// stronger optical reduction so every letter remains identifiable in portrait.
+const PHONE_BELLA_LINE_WIDTH_SCALE = 0.84
+
+
+const PHONE_DURMIENTE_LINE_WIDTH_SCALE = 0.58
 
 
 const FINAL_OPACITY = 0.94
@@ -162,6 +174,18 @@ export class BellaWordmark {
 
   private layoutScale =
     1
+
+  private layoutPositionX =
+    HERO_THRESHOLD_POSITION_X
+
+  private layoutPositionY =
+    HERO_THRESHOLD_POSITION_Y
+
+  private layoutDepth =
+    HERO_THRESHOLD_DEPTH
+
+  private heroIntroDepthOffset =
+    HERO_INTRO_DEPTH_OFFSET
 
 
   constructor(
@@ -330,16 +354,16 @@ export class BellaWordmark {
     // The threshold never retreats behind Bella. Its page-load settling stays
     // separate; scroll retirement is caused by the camera crossing this plane.
     this.group.position.y =
-      HERO_THRESHOLD_POSITION_Y
+      this.layoutPositionY
 
 
     this.group.position.z =
-      HERO_THRESHOLD_DEPTH -
+      this.layoutDepth -
       (
         1 -
         heroIntro
       ) *
-      HERO_INTRO_DEPTH_OFFSET
+      this.heroIntroDepthOffset
 
 
     this.group.rotation.set(
@@ -420,8 +444,18 @@ export class BellaWordmark {
 
 
   resize(
-    aspect: number,
+    viewport: CameraViewport,
   ): void {
+
+    const {
+      aspect,
+    } = viewport
+
+
+    const profile =
+      resolveCameraCompositionProfile(
+        viewport,
+      )
 
     const desktopScale =
       Math.min(
@@ -434,41 +468,122 @@ export class BellaWordmark {
       )
 
 
-    const narrowness =
-      smoothstep(
-        (
-          0.80 -
-          aspect
-        ) /
-        0.30,
-      )
+    if (
+      profile ===
+      'phone'
+    ) {
+
+      // Portrait phones intentionally retain an oversized, edge-cropped
+      // two-line lockup. Only the camera crosses it; it is never a DOM title.
+      this.layoutPositionX =
+        1.3
 
 
-    // Phase 6 will author mobile wordmark composition. Until then, retain a
-    // modest narrow-screen safeguard while allowing the desktop lockup to be
-    // genuinely monumental.
-    const scale =
-      THREE.MathUtils.lerp(
-        desktopScale,
-        Math.min(
-          desktopScale,
-          0.18,
-        ),
-        narrowness,
-      )
+      this.layoutPositionY =
+        4.5
+
+
+      this.layoutScale =
+        0.28
+
+
+      this.bellaLine.group.scale.x =
+        PHONE_BELLA_LINE_WIDTH_SCALE
+
+
+      this.bellaLine.group.position.x =
+        -1
+
+
+      this.durmienteLine.group.scale.x =
+        PHONE_DURMIENTE_LINE_WIDTH_SCALE
+
+
+      this.durmienteLine.group.position.x =
+        -2
+
+
+      this.heroIntroDepthOffset =
+        1.25
+    } else if (
+      profile ===
+      'tablet'
+    ) {
+
+      this.layoutPositionX =
+        0.78
+
+
+      this.layoutPositionY =
+        4
+
+
+      this.layoutScale =
+        0.38
+
+
+      this.bellaLine.group.scale.x =
+        BELLA_LINE_WIDTH_SCALE
+
+
+      this.bellaLine.group.position.x =
+        0
+
+
+      this.durmienteLine.group.scale.x =
+        DURMIENTE_LINE_WIDTH_SCALE
+
+
+      this.durmienteLine.group.position.x =
+        0
+
+
+      this.heroIntroDepthOffset =
+        1.6
+    } else {
+
+      // Preserve the approved desktop projection exactly.
+      this.layoutPositionX =
+        HERO_THRESHOLD_POSITION_X
+
+
+      this.layoutPositionY =
+        HERO_THRESHOLD_POSITION_Y
+
+
+      this.layoutScale =
+        desktopScale *
+        HERO_THRESHOLD_SCALE_COMPENSATION
+
+
+      this.bellaLine.group.scale.x =
+        BELLA_LINE_WIDTH_SCALE
+
+
+      this.bellaLine.group.position.x =
+        0
+
+
+      this.durmienteLine.group.scale.x =
+        DURMIENTE_LINE_WIDTH_SCALE
+
+
+      this.durmienteLine.group.position.x =
+        0
+
+
+      this.heroIntroDepthOffset =
+        HERO_INTRO_DEPTH_OFFSET
+    }
+
+
+    // All responsive profiles use the same world-space threshold plane.
+    this.layoutDepth =
+      HERO_THRESHOLD_DEPTH
 
 
     this.group.position.x =
-      THREE.MathUtils.lerp(
-        HERO_THRESHOLD_POSITION_X,
-        1.55,
-        narrowness,
-      )
-
-
-    this.layoutScale =
-      scale *
-      HERO_THRESHOLD_SCALE_COMPENSATION
+      this.layoutPositionX
   }
 
 

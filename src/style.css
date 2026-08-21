@@ -1410,21 +1410,21 @@ body {
   }
 
   .bella-fg-garden {
-    left: -38vw;
-    bottom: -7vh;
+    left: -30vw;
+    bottom: -4vh;
 
-    width: 105vw;
+    width: 82vw;
 
-    opacity: .72;
+    opacity: .62;
   }
 
   .bella-fg-tree {
-    right: -35vw;
+    right: -24vw;
     bottom: 5vh;
 
-    width: 80vw;
+    width: 62vw;
 
-    opacity: .55;
+    opacity: .48;
   }
 }
 

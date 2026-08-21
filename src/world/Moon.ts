@@ -1112,7 +1112,7 @@ export class Moon {
             -20,
           ),
         diameter:
-          6,
+          5,
       },
       {
         position:
