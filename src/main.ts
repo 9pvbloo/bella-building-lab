@@ -8,7 +8,9 @@ import {
 } from './camera/CameraDirector'
 import { DebugPanel } from './core/DebugPanel'
 import { RuntimePreferences } from './core/RuntimePreferences'
+import { SectionNavigation } from './core/SectionNavigation'
 import { ScrollDirector } from './core/ScrollDirector'
+import { mountRoomsClothProof } from './effects/cloth/RoomsClothProof'
 import { BellaWordmark } from './typography/BellaWordmark'
 import { Atmosphere } from './world/Atmosphere'
 import { Moon } from './world/Moon'
@@ -950,6 +952,19 @@ const runtimePreferences =
   new RuntimePreferences()
 
 
+const sectionNavigation =
+  new SectionNavigation(
+    runtimePreferences,
+    scrollDirector,
+  )
+
+
+// Phase 8A: one faithful, isolated Cloth proof in Habitaciones.
+mountRoomsClothProof(
+  runtimePreferences,
+)
+
+
 let exactProgress =
   scrollDirector.exactProgress
 
@@ -1365,6 +1380,11 @@ function updateActiveChapter(
 
   currentActiveChapter =
     activeIndex
+
+
+  sectionNavigation.update(
+    activeIndex,
+  )
 
 
   chapters.forEach(
@@ -2075,6 +2095,12 @@ function syncExactScrollState():
 
   exactProgress =
     scrollState.exactProgress
+
+
+  sectionNavigation.updateVisibility(
+    scrollState.direction,
+    window.scrollY,
+  )
 
 
   updateActiveChapter(

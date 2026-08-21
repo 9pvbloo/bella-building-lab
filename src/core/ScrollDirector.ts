@@ -98,6 +98,67 @@ export class ScrollDirector {
 
 
   /**
+   * Returns the native scroll position where a chapter owns the viewport
+   * completely: its center and the viewport center coincide. Navigation uses
+   * this same geometry so it cannot land between authored chapter states.
+   */
+  public getChapterRestingScrollY(
+    chapterIndex: number,
+  ): number {
+
+    const lastIndex =
+      this.chapters.length -
+      1
+
+    const index =
+      Math.round(
+        clamp(
+          chapterIndex,
+          0,
+          lastIndex,
+        ),
+      )
+
+
+    // Hero is intentionally authored at the document origin.
+    if (
+      index ===
+      0
+    ) {
+      return 0
+    }
+
+
+    const chapter =
+      this.chapters[
+        index
+      ]
+
+    const requestedScrollY =
+      this.getChapterCenter(
+        chapter,
+      ) -
+      window.innerHeight *
+        0.5
+
+
+    const maxScrollY =
+      Math.max(
+        0,
+        document.documentElement.scrollHeight -
+          window.innerHeight,
+      )
+
+
+    return clamp(
+      requestedScrollY,
+      0,
+      maxScrollY,
+    )
+  }
+
+
+  /**
    * Reconstruct exact progress from the current native scroll position.
    * The viewport-center and chapter-center interpolation intentionally
    * matches the pilot runtime's existing algorithm.
@@ -135,9 +196,9 @@ export class ScrollDirector {
 
 
     const firstCenter =
-      first.offsetTop +
-      first.offsetHeight *
-        0.5
+      this.getChapterCenter(
+        first,
+      )
 
 
     if (
@@ -176,15 +237,15 @@ export class ScrollDirector {
 
 
       const currentCenter =
-        current.offsetTop +
-        current.offsetHeight *
-          0.5
+        this.getChapterCenter(
+          current,
+        )
 
 
       const nextCenter =
-        next.offsetTop +
-        next.offsetHeight *
-          0.5
+        this.getChapterCenter(
+          next,
+        )
 
 
       if (
@@ -261,5 +322,15 @@ export class ScrollDirector {
 
 
     return this.currentState
+  }
+
+
+  private getChapterCenter(
+    chapter: HTMLElement,
+  ): number {
+
+    return chapter.offsetTop +
+      chapter.offsetHeight *
+        0.5
   }
 }

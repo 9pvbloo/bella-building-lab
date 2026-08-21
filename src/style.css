@@ -702,98 +702,217 @@ body {
 
 
 /* ==================================================
-   ROOM CARDS
+   HABITACIONES · PHOTOGRAPHIC INSTALLATION
+
+   The photo is the object. Room information is independent editorial DOM,
+   never a footer attached to a conventional card shell.
    ================================================== */
 
 .bella-room-grid {
-  display: grid;
+  position: relative;
 
-  grid-template-columns:
-    repeat(
-      2,
-      minmax(
-        0,
-        1fr
-      )
-    );
-
-  gap:
+  width: 100%;
+  min-height:
     clamp(
-      16px,
-      2vw,
-      30px
+      570px,
+      53vw,
+      710px
     );
 }
 
 .bella-room-card {
   position: relative;
 
-  overflow: hidden;
+  min-width: 0;
+}
 
-  min-height: 480px;
+.bella-room-card--primary {
+  z-index: 1;
 
-  border:
-    1px solid
-    rgba(
-      213,
-      238,
-      255,
-      0.18
-    );
-
-  background:
-    rgba(
-      4,
-      18,
-      40,
-      0.52
-    );
-
-  backdrop-filter:
-    blur(15px);
-
-  box-shadow:
-    0 38px 80px
-    rgba(
-      0,
-      0,
-      0,
-      0.32
+  width:
+    min(
+      100%,
+      clamp(
+        560px,
+        50vw,
+        700px
+      )
     );
 }
 
-.bella-room-card:nth-child(2) {
-  transform:
-    translateY(
-      70px
+.bella-room-card--secondary {
+  position: absolute;
+
+  z-index: 3;
+
+  top:
+    clamp(
+      240px,
+      22vw,
+      318px
+    );
+
+  right:
+    clamp(
+      -12px,
+      -1vw,
+      0px
+    );
+
+  width:
+    clamp(
+      245px,
+      27vw,
+      370px
     );
 }
 
 .bella-room-image {
-  height: 330px;
+  position: relative;
 
-  overflow: hidden;
+  width: 100%;
+
+  aspect-ratio: 4 / 3;
+
+  overflow: visible;
 }
 
 .bella-room-image img {
+  display: block;
+
   width: 100%;
   height: 100%;
 
-  display: block;
+  border-radius:
+    clamp(
+      18px,
+      2vw,
+      30px
+    );
 
   object-fit: cover;
 
   filter:
-    saturate(0.82)
-    brightness(0.82);
+    saturate(0.92)
+    brightness(0.94)
+    contrast(1.02);
+}
+
+.bella-room-card--secondary .bella-room-image img {
+  box-shadow:
+    0 18px 42px
+    rgba(
+      0,
+      4,
+      14,
+      0.32
+    );
+}
+
+
+/* ==================================================
+   PHASE 8A · BELLA CLOTH PROOF
+
+   The original photo remains in place beneath the WebGL2 canvas so a failed
+   initialization, WebGL2 absence, or reduced-motion preference remains usable.
+   ================================================== */
+
+.bella-room-image[data-bella-cloth="room"] {
+  position: relative;
+
+  min-width: 0;
+  min-height: 0;
+}
+
+.bella-room-image[data-bella-cloth="room"] > .bella-cloth-image-canvas {
+  position: absolute;
+  inset: 0;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  max-width: none;
+  max-height: none;
+
+  margin: 0;
+  border: 0;
+  padding: 0;
+
+  pointer-events: none;
+}
+
+.bella-room-image[data-bella-cloth="room"].is-bella-cloth-sdf-edge.is-bella-cloth-ready {
+  overflow: visible;
+}
+
+.bella-room-image[data-bella-cloth="room"].is-bella-cloth-sdf-edge.is-bella-cloth-ready > img {
+  opacity: 0;
+}
+
+.bella-room-image[data-bella-cloth="room"].is-bella-cloth-sdf-edge > .bella-cloth-image-canvas--sdf-edge {
+  inset: -24px;
+
+  width: calc(100% + 48px);
+  height: calc(100% + 48px);
+}
+
+@media (max-width: 899px) {
+  .bella-room-image[data-bella-cloth="room"].is-bella-cloth-sdf-edge > .bella-cloth-image-canvas--sdf-edge {
+    inset: -18px;
+
+    width: calc(100% + 36px);
+    height: calc(100% + 36px);
+  }
+}
+
+@media (max-width: 639px) {
+  .bella-room-image[data-bella-cloth="room"].is-bella-cloth-sdf-edge > .bella-cloth-image-canvas--sdf-edge {
+    inset: -12px;
+
+    width: calc(100% + 24px);
+    height: calc(100% + 24px);
+  }
 }
 
 .bella-room-card-copy {
-  padding:
-    22px 22px 25px;
+  width:
+    min(
+      100%,
+      360px
+    );
+
+  margin-top:
+    clamp(
+      18px,
+      2vw,
+      28px
+    );
+
+  padding-left:
+    clamp(
+      8px,
+      2vw,
+      34px
+    );
+}
+
+.bella-room-card-copy--secondary {
+  width: 270px;
+
+  margin-top: 16px;
+
+  padding-left: 10px;
 }
 
 .bella-room-card-copy span {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
   color:
     rgba(
       142,
@@ -807,9 +926,32 @@ body {
   letter-spacing: 0.2em;
 }
 
+.bella-room-card-copy span::after {
+  content: "";
+
+  display: block;
+
+  width:
+    clamp(
+      38px,
+      4vw,
+      68px
+    );
+
+  height: 1px;
+
+  background:
+    rgba(
+      194,
+      229,
+      247,
+      0.34
+    );
+}
+
 .bella-room-card-copy h3 {
   margin:
-    10px 0 6px;
+    13px 0 8px;
 
   color: #f3faff;
 
@@ -817,9 +959,20 @@ body {
     Georgia,
     serif;
 
-  font-size: 1.55rem;
+  font-size:
+    clamp(
+      1.3rem,
+      1.7vw,
+      2rem
+    );
 
   font-weight: 400;
+
+  line-height: 1.04;
+
+  letter-spacing: -0.025em;
+
+  text-transform: uppercase;
 }
 
 .bella-room-card-copy p {
@@ -836,6 +989,15 @@ body {
   font-size: 0.87rem;
 
   line-height: 1.6;
+
+  text-shadow:
+    0 2px 18px
+    rgba(
+      0,
+      0,
+      0,
+      0.62
+    );
 }
 
 
@@ -992,6 +1154,10 @@ body {
 
   .bella-room-grid {
     max-width: 800px;
+
+    min-height: 650px;
+
+    margin: 0 auto;
   }
 }
 
@@ -1042,20 +1208,36 @@ body {
   }
 
   .bella-room-grid {
-    grid-template-columns:
-      1fr;
+    display: grid;
+
+    max-width: 440px;
+    min-height: 0;
+
+    gap: 62px;
   }
 
-  .bella-room-card:nth-child(2) {
-    transform: none;
+  .bella-room-card--primary,
+  .bella-room-card--secondary {
+    position: relative;
+
+    top: auto;
+    right: auto;
+
+    width: 100%;
   }
 
-  .bella-room-card {
-    min-height: 390px;
+  .bella-room-card--secondary {
+    width:
+      min(
+        86%,
+        360px
+      );
+
+    margin-left: auto;
   }
 
-  .bella-room-image {
-    height: 250px;
+  .bella-room-card-copy {
+    padding-left: 10px;
   }
 
   .bella-scroll-cue {
@@ -1459,5 +1641,821 @@ body {
     opacity: 0;
 
     filter: none;
+  }
+}
+
+
+/* ==================================================
+   PHASE 8C · EDITORIAL CHAPTER SYSTEM
+   ================================================== */
+
+:root {
+  --bella-editorial-serif:
+    "Iowan Old Style",
+    "Palatino Linotype",
+    "Book Antiqua",
+    Georgia,
+    serif;
+
+  --bella-editorial-ui:
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+.bella-top-nav {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  z-index: 25;
+
+  display: flex;
+
+  align-items: center;
+
+  width: 100%;
+  min-height: 58px;
+
+  padding:
+    0
+    clamp(
+      22px,
+      4vw,
+      66px
+    );
+
+  color:
+    rgba(
+      235,
+      246,
+      255,
+      0.78
+    );
+
+  font-family: var(--bella-editorial-ui);
+
+  background:
+    rgba(
+      3,
+      8,
+      15,
+      0.93
+    );
+
+  -webkit-backdrop-filter:
+    blur(24px)
+    saturate(80%);
+
+  backdrop-filter:
+    blur(24px)
+    saturate(80%);
+
+  box-shadow:
+    0
+    10px
+    28px
+    rgba(
+      0,
+      0,
+      0,
+      0.16
+    );
+
+  opacity: 1;
+
+  transform: translateY(0);
+
+  transition:
+    transform
+      360ms
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      ),
+    opacity 300ms ease;
+
+  will-change:
+    transform,
+    opacity;
+
+  pointer-events: none;
+}
+
+.bella-top-nav.is-scroll-hidden {
+  opacity: 0;
+
+  transform:
+    translateY(
+      calc(
+        -100% -
+        8px
+      )
+    );
+}
+
+.bella-top-nav::after {
+  content: "";
+
+  position: absolute;
+
+  right:
+    clamp(
+      22px,
+      4vw,
+      66px
+    );
+  bottom: 0;
+  left:
+    clamp(
+      22px,
+      4vw,
+      66px
+    );
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(
+        202,
+        231,
+        247,
+        0.18
+      ),
+      rgba(
+        202,
+        231,
+        247,
+        0.04
+      )
+      56%,
+      transparent
+    );
+}
+
+.bella-top-nav-monogram,
+.bella-top-nav-links a {
+  color: inherit;
+
+  text-decoration: none;
+
+  pointer-events: auto;
+}
+
+.bella-top-nav-monogram {
+  display: inline-flex;
+
+  align-items: center;
+
+  min-height: 44px;
+
+  margin-right:
+    clamp(
+      26px,
+      5vw,
+      82px
+    );
+
+  color: #f4fbff;
+
+  font-family: var(--bella-editorial-serif);
+
+  font-size: 1.05rem;
+
+  font-weight: 400;
+
+  letter-spacing: -0.06em;
+}
+
+.bella-top-nav-links {
+  display: flex;
+
+  align-items: center;
+
+  gap:
+    clamp(
+      16px,
+      2vw,
+      34px
+    );
+
+  min-width: 0;
+}
+
+.bella-top-nav-links a {
+  position: relative;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  min-height: 44px;
+
+  padding: 2px 0;
+
+  color:
+    rgba(
+      222,
+      239,
+      250,
+      0.60
+    );
+
+  font-size:
+    clamp(
+      0.56rem,
+      0.62vw,
+      0.68rem
+    );
+
+  font-weight: 700;
+
+  letter-spacing: 0.16em;
+
+  text-transform: uppercase;
+
+  transition:
+    color 260ms ease;
+}
+
+.bella-top-nav-links a::after {
+  content: "";
+
+  position: absolute;
+
+  right: 0;
+  bottom: -1px;
+  left: 0;
+
+  height: 1px;
+
+  background: #d8f1ff;
+
+  opacity: 0;
+
+  transform: scaleX(0.35);
+
+  transition:
+    opacity 260ms ease,
+    transform 260ms ease;
+}
+
+.bella-top-nav-links a:hover,
+.bella-top-nav-links a.is-active {
+  color: #f3fbff;
+}
+
+.bella-top-nav-links a.is-active::after {
+  opacity: 0.8;
+
+  transform: scaleX(1);
+}
+
+.bella-top-nav a:focus {
+  outline: none;
+}
+
+.bella-top-nav a:focus-visible {
+  outline:
+    1px solid
+    rgba(
+      222,
+      243,
+      255,
+      0.80
+    );
+
+  outline-offset: 5px;
+}
+
+.bella-chapter {
+  scroll-margin-top: 72px;
+}
+
+.bella-chapter-inner {
+  width:
+    min(
+      1560px,
+      100%
+    );
+}
+
+.bella-display-title,
+.bella-room-card-copy h3,
+.bella-ending h2 {
+  font-family: var(--bella-editorial-serif);
+}
+
+.bella-editorial-chapter {
+  display: flex;
+
+  align-items: center;
+
+  gap:
+    clamp(
+      14px,
+      1.5vw,
+      24px
+    );
+
+  width: 100%;
+
+  margin:
+    0 0
+    clamp(
+      34px,
+      5vh,
+      56px
+    );
+
+  color:
+    rgba(
+      191,
+      222,
+      240,
+      0.70
+    );
+
+  font-family: var(--bella-editorial-ui);
+
+  font-size:
+    clamp(
+      0.6rem,
+      0.72vw,
+      0.75rem
+    );
+
+  font-weight: 700;
+
+  letter-spacing: 0.20em;
+
+  line-height: 1.3;
+
+  text-transform: uppercase;
+}
+
+.bella-editorial-chapter::after {
+  content: "";
+
+  display: block;
+
+  flex: 1;
+
+  min-width: 40px;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(
+        183,
+        221,
+        242,
+        0.32
+      ),
+      rgba(
+        183,
+        221,
+        242,
+        0.05
+      )
+      72%,
+      transparent
+    );
+}
+
+.bella-chapter[data-bella-vertical-label]::after {
+  content:
+    attr(
+      data-bella-vertical-label
+    );
+
+  position: absolute;
+
+  top: 50%;
+  right:
+    clamp(
+      14px,
+      2.2vw,
+      42px
+    );
+
+  z-index: 3;
+
+  color:
+    rgba(
+      194,
+      225,
+      241,
+      0.36
+    );
+
+  font-family: var(--bella-editorial-ui);
+
+  font-size:
+    clamp(
+      0.52rem,
+      0.58vw,
+      0.66rem
+    );
+
+  font-weight: 700;
+
+  letter-spacing: 0.25em;
+
+  writing-mode: vertical-rl;
+
+  transform:
+    translateY(-50%)
+    rotate(180deg);
+
+  pointer-events: none;
+}
+
+.bella-experience .bella-chapter-inner {
+  display: grid;
+
+  grid-template-columns:
+    minmax(
+      360px,
+      0.72fr
+    )
+    minmax(
+      400px,
+      1.28fr
+    );
+
+  column-gap:
+    clamp(
+      54px,
+      9vw,
+      180px
+    );
+}
+
+.bella-experience .bella-editorial-chapter {
+  grid-column: 1 / -1;
+}
+
+.bella-experience-copy {
+  width:
+    min(
+      760px,
+      100%
+    );
+}
+
+.bella-rooms .bella-editorial-chapter {
+  grid-column: 1 / -1;
+
+  margin-bottom:
+    clamp(
+      12px,
+      2vh,
+      26px
+    );
+}
+
+.bella-content-copy {
+  width:
+    min(
+      780px,
+      62vw
+    );
+}
+
+.bella-services .bella-content-copy,
+.bella-location .bella-content-copy {
+  margin-left:
+    clamp(
+      0px,
+      8vw,
+      150px
+    );
+}
+
+.bella-gallery {
+  justify-content: center;
+}
+
+.bella-gallery-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(
+      430px,
+      1.22fr
+    )
+    minmax(
+      300px,
+      0.78fr
+    );
+
+  align-items: center;
+
+  column-gap:
+    clamp(
+      42px,
+      8vw,
+      150px
+    );
+  row-gap:
+    clamp(
+      28px,
+      5vh,
+      54px
+    );
+}
+
+.bella-gallery-layout > .bella-editorial-chapter {
+  grid-column: 1 / -1;
+
+  margin-bottom: 0;
+}
+
+.bella-gallery-copy {
+  grid-column: 2;
+
+  width: 100%;
+
+  margin-left: 0;
+
+  text-align: left;
+}
+
+.bella-gallery-copy .bella-body {
+  margin-left: 0;
+}
+
+.bella-gallery-photo-wall {
+  position: relative;
+
+  grid-column: 1;
+  grid-row: 2;
+
+  min-height:
+    clamp(
+      420px,
+      39vw,
+      610px
+    );
+}
+
+.bella-gallery-photo {
+  position: absolute;
+
+  margin: 0;
+
+  overflow: hidden;
+
+  border-radius:
+    clamp(
+      18px,
+      2.1vw,
+      32px
+    );
+
+  box-shadow:
+    0 22px 62px
+    rgba(
+      0,
+      5,
+      15,
+      0.25
+    );
+}
+
+.bella-gallery-photo--lead {
+  inset: 0 13% 10% 0;
+}
+
+.bella-gallery-photo--detail {
+  right: 0;
+  bottom: 0;
+
+  width: 47%;
+  height: 44%;
+}
+
+.bella-gallery-photo img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  filter:
+    saturate(0.88)
+    brightness(0.88)
+    contrast(1.04);
+}
+
+.bella-side-markers {
+  position: fixed;
+
+  top: 50%;
+  right:
+    clamp(
+      14px,
+      1.8vw,
+      30px
+    );
+
+  z-index: 24;
+
+  display: grid;
+
+  gap: 9px;
+
+  transform: translateY(-50%);
+}
+
+.bella-side-markers a {
+  display: block;
+
+  width: 11px;
+  height: 1px;
+
+  background:
+    rgba(
+      208,
+      233,
+      247,
+      0.28
+    );
+
+  transition:
+    width 260ms ease,
+    background-color 260ms ease;
+}
+
+.bella-side-markers a:hover,
+.bella-side-markers a.is-active {
+  width: 24px;
+
+  background:
+    rgba(
+      238,
+      249,
+      255,
+      0.92
+    );
+}
+
+.bella-ending-copy {
+  width:
+    min(
+      860px,
+      100%
+    );
+
+  margin: 0 auto;
+}
+
+.bella-ending .bella-editorial-chapter {
+  justify-content: flex-start;
+
+  text-align: left;
+}
+
+@media (
+  max-width: 1000px
+) {
+
+  .bella-experience .bella-chapter-inner,
+  .bella-gallery-layout {
+    grid-template-columns:
+      minmax(
+        0,
+        1fr
+      );
+  }
+
+  .bella-experience .bella-editorial-chapter,
+  .bella-gallery-layout > .bella-editorial-chapter,
+  .bella-gallery-copy,
+  .bella-gallery-photo-wall {
+    grid-column: 1;
+  }
+
+  .bella-gallery-copy {
+    grid-row: 2;
+  }
+
+  .bella-gallery-photo-wall {
+    grid-row: 3;
+
+    width:
+      min(
+        760px,
+        100%
+      );
+  }
+}
+
+@media (
+  max-width: 768px
+) {
+
+  .bella-top-nav {
+    min-height: 46px;
+
+    padding: 0 16px;
+  }
+
+  .bella-top-nav::after {
+    right: 16px;
+    left: 16px;
+  }
+
+  .bella-top-nav-monogram {
+    display: none;
+  }
+
+  .bella-top-nav-links {
+    gap: 18px;
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+  .bella-top-nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bella-top-nav-links a {
+    flex: 0 0 auto;
+
+    min-height: 42px;
+
+    font-size: 0.56rem;
+
+    letter-spacing: 0.12em;
+  }
+
+  .bella-editorial-chapter {
+    gap: 12px;
+
+    margin-bottom: 30px;
+
+    font-size: 0.58rem;
+
+    letter-spacing: 0.16em;
+  }
+
+  .bella-chapter[data-bella-vertical-label]::after,
+  .bella-side-markers {
+    display: none;
+  }
+
+  .bella-experience .bella-chapter-inner {
+    display: block;
+  }
+
+  .bella-experience-copy,
+  .bella-content-copy {
+    width: 100%;
+  }
+
+  .bella-services .bella-content-copy,
+  .bella-location .bella-content-copy {
+    margin-left: 0;
+  }
+
+  .bella-gallery-layout {
+    display: block;
+  }
+
+  .bella-gallery-layout > .bella-editorial-chapter {
+    margin-bottom: 30px;
+  }
+
+  .bella-gallery-photo-wall {
+    min-height: 380px;
+
+    margin-top: 48px;
+  }
+
+  .bella-gallery-photo--lead {
+    right: 8%;
+  }
+}
+
+@media (
+  prefers-reduced-motion: reduce
+) {
+
+  .bella-top-nav {
+    transition: none;
   }
 }

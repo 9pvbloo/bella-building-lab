@@ -100,6 +100,32 @@
   </div>
 
 
+  <nav
+    class="bella-top-nav"
+    aria-label="Navegación principal"
+  >
+    <a
+      class="bella-top-nav-monogram"
+      href="#hero"
+      data-bella-section-link
+      data-bella-section-index="0"
+      aria-label="Ir al inicio"
+    >
+      BD
+    </a>
+
+    <div class="bella-top-nav-links">
+      <a href="#hero" data-bella-section-link data-bella-section-index="0">Inicio</a>
+      <a href="#experience" data-bella-section-link data-bella-section-index="1">Experiencia</a>
+      <a href="#rooms" data-bella-section-link data-bella-section-index="2">Habitaciones</a>
+      <a href="#services" data-bella-section-link data-bella-section-index="3">Servicios</a>
+      <a href="#gallery" data-bella-section-link data-bella-section-index="4">Galería</a>
+      <a href="#location" data-bella-section-link data-bella-section-index="5">Huancayo</a>
+      <a href="#reserve" data-bella-section-link data-bella-section-index="6">Reservar</a>
+    </div>
+  </nav>
+
+
   <!-- ==================================================
        CONTENIDO
        ================================================== -->
@@ -172,15 +198,16 @@
       class="bella-chapter bella-experience"
       id="experience"
       data-bella-cam="1"
+      data-bella-vertical-label="EXPERIENCIA"
     >
 
       <div class="bella-chapter-inner">
 
-        <div class="bella-experience-copy">
+        <p class="bella-editorial-chapter">
+          01 — Experiencia Bella Durmiente
+        </p>
 
-          <p class="bella-eyebrow">
-            01 · Experiencia Bella Durmiente
-          </p>
+        <div class="bella-experience-copy">
 
           <h2 class="bella-display-title">
             Un hospedaje pensado
@@ -228,15 +255,16 @@
       class="bella-chapter bella-rooms"
       id="rooms"
       data-bella-cam="2"
+      data-bella-vertical-label="HABITACIONES"
     >
 
       <div class="bella-chapter-inner bella-rooms-inner">
 
-        <header class="bella-rooms-head">
+        <p class="bella-editorial-chapter">
+          02 — Habitaciones reales
+        </p>
 
-          <p class="bella-eyebrow">
-            02 · Habitaciones reales
-          </p>
+        <header class="bella-rooms-head">
 
           <h2 class="bella-display-title">
             Espacios cómodos
@@ -254,16 +282,19 @@
 
         <div class="bella-room-grid">
 
-          <article class="bella-room-card">
+          <article class="bella-room-card bella-room-card--primary">
 
-            <div class="bella-room-image">
+            <div
+              class="bella-room-image"
+              data-bella-cloth="room"
+            >
               <img
                 src="/story/habitacion-01.jpg"
                 alt="Habitación matrimonial Bella Durmiente"
               >
             </div>
 
-            <div class="bella-room-card-copy">
+            <div class="bella-room-card-copy bella-room-card-copy--primary">
               <span>01</span>
               <h3>Habitación matrimonial</h3>
               <p>Comodidad para una o dos personas.</p>
@@ -272,7 +303,7 @@
           </article>
 
 
-          <article class="bella-room-card">
+          <article class="bella-room-card bella-room-card--secondary">
 
             <div class="bella-room-image">
               <img
@@ -281,7 +312,7 @@
               >
             </div>
 
-            <div class="bella-room-card-copy">
+            <div class="bella-room-card-copy bella-room-card-copy--secondary">
               <span>02</span>
               <h3>Matrimonial con vista</h3>
               <p>Luz natural y descanso tranquilo.</p>
@@ -304,12 +335,13 @@
       class="bella-chapter bella-services"
       id="services"
       data-bella-cam="3"
+      data-bella-vertical-label="SERVICIOS"
     >
 
       <div class="bella-chapter-inner bella-content-copy">
 
-        <p class="bella-eyebrow">
-          03 · Servicios
+        <p class="bella-editorial-chapter">
+          03 — Servicios
         </p>
 
         <h2 class="bella-display-title">
@@ -336,24 +368,53 @@
       class="bella-chapter bella-gallery"
       id="gallery"
       data-bella-cam="4"
+      data-bella-vertical-label="GALERÍA"
     >
 
-      <div class="bella-chapter-inner bella-content-copy bella-gallery-copy">
+      <div class="bella-chapter-inner bella-gallery-layout">
 
-        <p class="bella-eyebrow">
-          04 · Galería
+        <p class="bella-editorial-chapter">
+          04 — Galería
         </p>
 
-        <h2 class="bella-display-title">
-          Momentos para
-          <span>mirar con calma</span>
-        </h2>
+        <div class="bella-content-copy bella-gallery-copy">
 
-        <p class="bella-body">
-          Un espacio preparado para que la futura galería
-          muestre habitaciones, detalles y la atmósfera
-          propia de Bella Durmiente.
-        </p>
+          <h2 class="bella-display-title">
+            Momentos para
+            <span>mirar con calma</span>
+          </h2>
+
+          <p class="bella-body">
+            Una selección de habitaciones, arquitectura
+            y detalles de Bella Durmiente, preparada para
+            recibir futuras superficies Cloth.
+          </p>
+
+        </div>
+
+        <div class="bella-gallery-photo-wall">
+
+          <figure
+            class="bella-gallery-photo bella-gallery-photo--lead"
+            data-bella-gallery-slot="lead"
+          >
+            <img
+              src="/reference/fachada_bella_durmiente.jpg"
+              alt="Fachada de Hospedaje Bella Durmiente"
+            >
+          </figure>
+
+          <figure
+            class="bella-gallery-photo bella-gallery-photo--detail"
+            data-bella-gallery-slot="detail"
+          >
+            <img
+              src="/story/habitacion-02.jpg"
+              alt="Habitación con vista Bella Durmiente"
+            >
+          </figure>
+
+        </div>
 
       </div>
 
@@ -368,12 +429,13 @@
       class="bella-chapter bella-location"
       id="location"
       data-bella-cam="5"
+      data-bella-vertical-label="HUANCAYO"
     >
 
       <div class="bella-chapter-inner bella-content-copy">
 
-        <p class="bella-eyebrow">
-          05 · Huancayo / Ubicación
+        <p class="bella-editorial-chapter">
+          05 — Huancayo
         </p>
 
         <h2 class="bella-display-title">
@@ -400,12 +462,13 @@
       class="bella-chapter bella-ending"
       id="reserve"
       data-bella-cam="6"
+      data-bella-vertical-label="RESERVAR"
     >
 
       <div class="bella-ending-copy">
 
-        <p class="bella-eyebrow">
-          06 · Hospedaje Bella Durmiente
+        <p class="bella-editorial-chapter">
+          06 — Reservar
         </p>
 
         <h2>
@@ -430,6 +493,20 @@
 
 
   </main>
+
+
+  <nav
+    class="bella-side-markers"
+    aria-label="Marcadores de capítulo"
+  >
+    <a href="#hero" data-bella-section-link data-bella-section-index="0" aria-label="Inicio"></a>
+    <a href="#experience" data-bella-section-link data-bella-section-index="1" aria-label="Experiencia"></a>
+    <a href="#rooms" data-bella-section-link data-bella-section-index="2" aria-label="Habitaciones"></a>
+    <a href="#services" data-bella-section-link data-bella-section-index="3" aria-label="Servicios"></a>
+    <a href="#gallery" data-bella-section-link data-bella-section-index="4" aria-label="Galería"></a>
+    <a href="#location" data-bella-section-link data-bella-section-index="5" aria-label="Huancayo"></a>
+    <a href="#reserve" data-bella-section-link data-bella-section-index="6" aria-label="Reservar"></a>
+  </nav>
 
 
   <!-- ==================================================
