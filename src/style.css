@@ -372,6 +372,54 @@ body {
 }
 
 
+/*
+   Desktop Hero copy owns a compact upper-left editorial zone so the
+   world-space wordmark can occupy the middle/lower composition beneath it.
+*/
+@media (
+  min-width: 769px
+) {
+
+  .bella-hero {
+    align-items: flex-start;
+
+    padding-top:
+      clamp(
+        118px,
+        16vh,
+        144px
+      );
+  }
+
+  .bella-hero .bella-eyebrow {
+    margin-bottom: 14px;
+  }
+
+  .bella-hero h2 {
+    margin-top: 0;
+
+    font-size:
+      clamp(
+        2rem,
+        3.15vw,
+        3.75rem
+      );
+
+    line-height: 1.03;
+  }
+
+  .bella-hero .bella-body {
+    margin-top: 14px;
+
+    line-height: 1.62;
+  }
+
+  .bella-hero .bella-actions {
+    margin-top: 22px;
+  }
+}
+
+
 /* ==================================================
    BOTONES HERO
    ================================================== */
