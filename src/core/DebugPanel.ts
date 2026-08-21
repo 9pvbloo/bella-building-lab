@@ -26,6 +26,13 @@ export type DebugPanelSnapshot = {
     pendingShootingStarCount: number
     secondsUntilNextShootingStarEvent: number
   }
+  rain: {
+    profile: string
+    particleCount: number
+    farCount: number
+    midCount: number
+    nearCount: number
+  }
 }
 
 
@@ -111,6 +118,7 @@ export class DebugPanel {
       `calls ${snapshot.renderCalls} · tris ${snapshot.triangles}`,
       `textures ${snapshot.textures} · programs ${snapshot.programs}`,
       `sky ${snapshot.nightSky.visibleStarCount} stars · shooting ${snapshot.nightSky.activeShootingStarCount}/4 · queue ${snapshot.nightSky.pendingShootingStarCount} · next ${format(snapshot.nightSky.secondsUntilNextShootingStarEvent, 1)}s`,
+      `rain ${snapshot.rain.profile} · ${snapshot.rain.particleCount} streaks · ${snapshot.rain.farCount}/${snapshot.rain.midCount}/${snapshot.rain.nearCount}`,
     ].join(
       '\n',
     )

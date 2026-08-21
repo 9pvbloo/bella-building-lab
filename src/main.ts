@@ -13,6 +13,7 @@ import { BellaWordmark } from './typography/BellaWordmark'
 import { Atmosphere } from './world/Atmosphere'
 import { Moon } from './world/Moon'
 import { NightSky } from './world/NightSky'
+import { Rain } from './world/Rain'
 
 
 // ==================================================
@@ -890,6 +891,16 @@ scene.add(
 
 const atmosphere =
   new Atmosphere(
+    scene,
+  )
+
+
+// ==================================================
+// LLUVIA CINEMÁTICA
+// ==================================================
+
+const rain =
+  new Rain(
     scene,
   )
 
@@ -2287,6 +2298,23 @@ function animate(
 
 
   // --------------------------------------------------
+  // Lluvia cinematográfica
+  // --------------------------------------------------
+
+  rain.update({
+    elapsed,
+    delta,
+    camera,
+    viewport:
+      cameraViewport,
+    prefersReducedMotion:
+      runtimePreferences.prefersReducedMotion,
+    isDocumentVisible:
+      runtimePreferences.isDocumentVisible,
+  })
+
+
+  // --------------------------------------------------
   // Luces
   // --------------------------------------------------
 
@@ -2371,6 +2399,8 @@ function animate(
       programCount,
     nightSky:
       nightSky.debugState,
+    rain:
+      rain.debugState,
   })
 
 
