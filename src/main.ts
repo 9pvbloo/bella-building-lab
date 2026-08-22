@@ -144,7 +144,7 @@ const scene =
 
 scene.background =
   new THREE.Color(
-    '#05090f',
+    '#07111d',
   )
 
 
@@ -225,7 +225,7 @@ renderer.toneMapping =
 
 
 renderer.toneMappingExposure =
-  0.87
+  1.04
 
 
 renderer.shadowMap.enabled =
@@ -247,9 +247,9 @@ renderer.shadowMap.type =
 
 const hemisphere =
   new THREE.HemisphereLight(
-    '#60747d',
-    '#020508',
-    0.58,
+    '#9ebfce',
+    '#0b1720',
+    0.72,
   )
 
 
@@ -264,8 +264,8 @@ scene.add(
 
 const moonLight =
   new THREE.DirectionalLight(
-    '#dbeef5',
-    2.52,
+    '#e8f6ff',
+    3.1,
   )
 
 
@@ -321,8 +321,8 @@ scene.add(
 
 const blueFill =
   new THREE.DirectionalLight(
-    '#718994',
-    0.32,
+    '#9bc5dc',
+    0.54,
   )
 
 
@@ -342,8 +342,8 @@ scene.add(
 // without introducing a second visible lighting language.
 const moonRim =
   new THREE.DirectionalLight(
-    '#c6e0e8',
-    0.36,
+    '#e0f3fa',
+    0.48,
   )
 
 
@@ -365,17 +365,17 @@ scene.add(
 
 const entranceLight =
   new THREE.PointLight(
-    '#ffd0a0',
-    0.78,
-    12,
+    '#ffe1b8',
+    1.28,
+    9.6,
     2,
   )
 
 
 entranceLight.position.set(
   0.8,
-  2.15,
-  4.1,
+  1.2,
+  3.15,
 )
 
 
@@ -430,8 +430,14 @@ type MountainLayer = {
 function createMountainGeometry(
   width: number,
   height: number,
+  depth: number,
   seed: number,
   detail: number,
+  palette: readonly [string, string, string] = [
+    '#345865',
+    '#1d4050',
+    '#0e2a39',
+  ],
 ): THREE.BufferGeometry {
 
   const random =
@@ -444,6 +450,12 @@ function createMountainGeometry(
     detail
 
 
+  // Each range is a shallow, faceted landform. The broad slope bands make it
+  // read as terrain in oblique shots instead of a single paper-cut silhouette.
+  const slopeRows =
+    5
+
+
   const vertices:
     number[] = []
 
@@ -452,8 +464,105 @@ function createMountainGeometry(
     number[] = []
 
 
+  const colors:
+    number[] = []
+
+
   const ridge:
     number[] = []
+
+
+  const anchors =
+    Array.from(
+      {
+        length: 10,
+      },
+      () =>
+        THREE.MathUtils.lerp(
+          0.29,
+          0.56,
+          random(),
+        ),
+    )
+
+
+  anchors[0] =
+    0.38
+
+
+  anchors[
+    anchors.length -
+    1
+  ] =
+    0.34
+
+
+  const peaks =
+    (() => {
+
+      const result:
+        {
+          center: number
+          width: number
+          height: number
+        }[] = []
+
+
+      let center =
+        -0.08
+
+
+      for (
+        let index =
+          0;
+        index <
+          6;
+        index +=
+          1
+      ) {
+
+        center +=
+          THREE.MathUtils.lerp(
+            0.12,
+            0.24,
+            random(),
+          )
+
+
+        result.push({
+          center,
+          width:
+            THREE.MathUtils.lerp(
+              0.055,
+              0.14,
+              random(),
+            ),
+          height:
+            THREE.MathUtils.lerp(
+              0.08,
+              0.22,
+              random(),
+            ),
+        })
+      }
+
+
+      return result
+    })()
+
+
+  const ridgeDetail =
+    Array.from(
+      {
+        length: 24,
+      },
+      () =>
+        THREE.MathUtils.lerp(
+          -0.035,
+          0.035,
+          random(),
+        ),
+    )
 
 
   const halfWidth =
@@ -474,45 +583,137 @@ function createMountainGeometry(
       segments
 
 
-    const major =
-      Math.sin(
-        normalized *
-        Math.PI *
-        3.4 +
-        seed *
-        0.01,
-      ) *
-      0.15
-
-
-    const secondary =
-      Math.sin(
-        normalized *
-        Math.PI *
-        8.7 +
-        seed *
-        0.05,
-      ) *
-      0.065
-
-
-    const noise =
+    const anchorPosition =
+      normalized *
       (
-        random() -
-        0.5
+        anchors.length -
+        1
+      )
+
+
+    const anchorIndex =
+      Math.min(
+        Math.floor(
+          anchorPosition,
+        ),
+        anchors.length -
+        2,
+      )
+
+
+    const anchorProgress =
+      anchorPosition -
+      anchorIndex
+
+
+    const eased =
+      anchorProgress *
+      anchorProgress *
+      (
+        3 -
+        2 *
+          anchorProgress
+      )
+
+
+    let current =
+      THREE.MathUtils.lerp(
+        anchors[
+          anchorIndex
+        ],
+        anchors[
+          anchorIndex +
+          1
+        ],
+        eased,
+      )
+
+
+    peaks.forEach(
+      (
+        peak,
+      ) => {
+
+        const distance =
+          (
+            normalized -
+            peak.center
+          ) /
+          peak.width
+
+
+        current +=
+          peak.height *
+          Math.exp(
+            -distance *
+            distance *
+            1.9,
+          )
+      },
+    )
+
+
+    const detailPosition =
+      normalized *
+      (
+        ridgeDetail.length -
+        1
+      )
+
+
+    const detailIndex =
+      Math.min(
+        Math.floor(
+          detailPosition,
+        ),
+        ridgeDetail.length -
+        2,
+      )
+
+
+    const detailProgress =
+      detailPosition -
+      detailIndex
+
+
+    const detailEased =
+      detailProgress *
+      detailProgress *
+      (
+        3 -
+        2 *
+          detailProgress
+      )
+
+
+    current +=
+      THREE.MathUtils.lerp(
+        ridgeDetail[
+          detailIndex
+        ],
+        ridgeDetail[
+          detailIndex +
+          1
+        ],
+        detailEased,
+      )
+
+
+    current +=
+      Math.sin(
+        normalized *
+        Math.PI *
+        2.4 +
+        seed *
+          0.013,
       ) *
-      0.075
+      0.022
 
 
-    const current =
+    current =
       clamp(
-        0.48 +
-        major +
-        secondary +
-        noise,
-
-        0.24,
-
+        current,
+        0.27,
         0.78,
       )
 
@@ -523,6 +724,24 @@ function createMountainGeometry(
   }
 
 
+  const crestColor =
+    new THREE.Color(
+      palette[0],
+    )
+
+
+  const middleColor =
+    new THREE.Color(
+      palette[1],
+    )
+
+
+  const baseColor =
+    new THREE.Color(
+      palette[2],
+    )
+
+
   for (
     let i =
       0;
@@ -531,39 +750,162 @@ function createMountainGeometry(
     i += 1
   ) {
 
+    const normalized =
+      i /
+      segments
+
+
     const x =
       THREE.MathUtils.lerp(
         -halfWidth,
         halfWidth,
-        i /
-          segments,
+        normalized,
       )
 
 
-    const y =
+    const ridgeY =
       ridge[
         i
       ] *
       height
 
 
-    // Cresta
-
-    vertices.push(
-      x,
-      y,
-      0,
-    )
-
-
-    // Base
-
-    vertices.push(
-      x,
+    const baseY =
       -height *
-        0.45,
-      0,
-    )
+      0.46
+
+
+    for (
+      let row =
+        0;
+      row <=
+        slopeRows;
+      row +=
+        1
+    ) {
+
+      const slopeProgress =
+        row /
+        slopeRows
+
+
+      const faceWave =
+        Math.sin(
+          normalized *
+          Math.PI *
+          2.1 +
+          row *
+            0.84 +
+          seed *
+            0.009,
+        ) *
+        height *
+        0.035 *
+        Math.sin(
+          slopeProgress *
+          Math.PI,
+        )
+
+
+      vertices.push(
+        x +
+          Math.sin(
+            normalized *
+            Math.PI *
+            3.1 +
+            row *
+              0.61,
+          ) *
+            depth *
+            0.025 *
+            slopeProgress,
+        THREE.MathUtils.lerp(
+          ridgeY,
+          baseY,
+          slopeProgress,
+        ) +
+          faceWave,
+        slopeProgress *
+          depth *
+          0.42,
+      )
+
+
+      const color =
+        new THREE.Color()
+
+
+      if (
+        slopeProgress <
+        0.45
+      ) {
+
+        color.lerpColors(
+          crestColor,
+          middleColor,
+          slopeProgress /
+            0.45,
+        )
+      } else {
+
+        color.lerpColors(
+          middleColor,
+          baseColor,
+          (
+            slopeProgress -
+            0.45
+          ) /
+            0.55,
+        )
+      }
+
+
+      // Two broad, offset tonal fields reveal the mountain face as terrain
+      // from Huancayo's high camera. They are intentionally too slow to read
+      // as texture noise or a repeated striped pattern.
+      const primaryFacet =
+        0.5 +
+        0.5 *
+          Math.sin(
+            normalized *
+            Math.PI *
+            2.35 +
+            slopeProgress *
+              1.9 +
+            seed *
+              0.017,
+          )
+
+
+      const secondaryFacet =
+        0.5 +
+        0.5 *
+          Math.sin(
+            normalized *
+            Math.PI *
+            4.15 -
+            slopeProgress *
+              2.4 +
+            seed *
+              0.011,
+          )
+
+
+      color.multiplyScalar(
+        0.72 +
+        primaryFacet *
+          0.23 +
+        secondaryFacet *
+          0.1,
+      )
+
+
+      colors.push(
+        color.r,
+        color.g,
+        color.b,
+      )
+    }
   }
 
 
@@ -575,35 +917,50 @@ function createMountainGeometry(
     i += 1
   ) {
 
-    const a =
-      i *
-      2
+    for (
+      let row =
+        0;
+      row <
+        slopeRows;
+      row +=
+        1
+    ) {
+
+      const a =
+        i *
+          (
+            slopeRows +
+            1
+          ) +
+        row
 
 
-    const b =
-      a +
-      1
+      const b =
+        a +
+        1
 
 
-    const c =
-      a +
-      2
+      const c =
+        a +
+        slopeRows +
+        1
 
 
-    const d =
-      a +
-      3
+      const d =
+        c +
+        1
 
 
-    indices.push(
-      a,
-      b,
-      c,
+      indices.push(
+        a,
+        b,
+        c,
 
-      c,
-      b,
-      d,
-    )
+        c,
+        b,
+        d,
+      )
+    }
   }
 
 
@@ -626,6 +983,15 @@ function createMountainGeometry(
   )
 
 
+  geometry.setAttribute(
+    'color',
+    new THREE.Float32BufferAttribute(
+      colors,
+      3,
+    ),
+  )
+
+
   geometry.computeVertexNormals()
 
 
@@ -641,21 +1007,27 @@ const mountainFar =
   new THREE.Mesh(
 
     createMountainGeometry(
-      72,
-      15,
+      82,
+      18,
+      8.0,
       91,
-      48,
+      64,
+      [
+        '#2d4d5a',
+        '#183645',
+        '#0c2735',
+      ],
     ),
 
-    new THREE.MeshBasicMaterial({
-      color:
-        '#1b2932',
+    new THREE.MeshLambertMaterial({
+      vertexColors:
+        true,
 
       transparent:
         true,
 
       opacity:
-        0.72,
+        0.58,
 
       side:
         THREE.DoubleSide,
@@ -665,15 +1037,18 @@ const mountainFar =
 
       fog:
         true,
+
+      flatShading:
+        true,
     }),
 
   )
 
 
 mountainFar.position.set(
-  1,
   -1.5,
-  -42,
+  -2.2,
+  -47,
 )
 
 
@@ -690,21 +1065,27 @@ const mountainMid =
   new THREE.Mesh(
 
     createMountainGeometry(
-      62,
-      12,
+      74,
+      16,
+      11.0,
       173,
-      52,
+      62,
+      [
+        '#1d4354',
+        '#0d2d3e',
+        '#071e2c',
+      ],
     ),
 
-    new THREE.MeshBasicMaterial({
-      color:
-        '#111f28',
+    new THREE.MeshLambertMaterial({
+      vertexColors:
+        true,
 
       transparent:
         true,
 
       opacity:
-        0.88,
+        0.76,
 
       side:
         THREE.DoubleSide,
@@ -714,15 +1095,18 @@ const mountainMid =
 
       fog:
         true,
+
+      flatShading:
+        true,
     }),
 
   )
 
 
 mountainMid.position.set(
-  -2.5,
-  -2.4,
-  -28,
+  1.8,
+  -2.9,
+  -33,
 )
 
 
@@ -739,21 +1123,27 @@ const mountainNear =
   new THREE.Mesh(
 
     createMountainGeometry(
-      54,
-      9.5,
+      65,
+      14,
+      9.6,
       285,
-      46,
+      58,
+      [
+        '#51727a',
+        '#2b5160',
+        '#183b4b',
+      ],
     ),
 
-    new THREE.MeshBasicMaterial({
-      color:
-        '#0a141b',
+    new THREE.MeshLambertMaterial({
+      vertexColors:
+        true,
 
       transparent:
         true,
 
       opacity:
-        0.95,
+        0.62,
 
       side:
         THREE.DoubleSide,
@@ -763,15 +1153,18 @@ const mountainNear =
 
       fog:
         true,
+
+      flatShading:
+        true,
     }),
 
   )
 
 
 mountainNear.position.set(
-  1.5,
-  -3.2,
-  -19,
+  -2.8,
+  -3.8,
+  -22,
 )
 
 
@@ -792,10 +1185,10 @@ const mountainLayers:
       mountainFar,
 
     baseX:
-      1,
+      -1.5,
 
     baseY:
-      -1.5,
+      -2.2,
 
     parallax:
       0.22,
@@ -807,10 +1200,10 @@ const mountainLayers:
       mountainMid,
 
     baseX:
-      -2.5,
+      1.8,
 
     baseY:
-      -2.4,
+      -2.9,
 
     parallax:
       0.48,
@@ -822,10 +1215,10 @@ const mountainLayers:
       mountainNear,
 
     baseX:
-      1.5,
+      -2.8,
 
     baseY:
-      -3.2,
+      -3.8,
 
     parallax:
       0.85,
@@ -1033,9 +1426,9 @@ const worldScrimStates:
   WorldScrimState[] = [
 
   {
-    leftOpacity: 0.88,
-    middleOpacity: 0.60,
-    rightOpacity: 0.16,
+    leftOpacity: 0.66,
+    middleOpacity: 0.40,
+    rightOpacity: 0.09,
     middleStop: 34,
     rightStop: 65,
     focalX: 22,
@@ -1048,83 +1441,83 @@ const worldScrimStates:
 
 
   {
-    leftOpacity: 0.36,
-    middleOpacity: 0.14,
-    rightOpacity: 0.02,
+    leftOpacity: 0.26,
+    middleOpacity: 0.10,
+    rightOpacity: 0.015,
     middleStop: 46,
     rightStop: 78,
     focalX: 22,
     focalY: 50,
     focalWidth: 80,
     focalHeight: 62,
-    focalCoreOpacity: 0.58,
-    focalSoftOpacity: 0.20,
+    focalCoreOpacity: 0.46,
+    focalSoftOpacity: 0.16,
   },
 
 
   {
-    leftOpacity: 0.20,
-    middleOpacity: 0.08,
-    rightOpacity: 0.02,
+    leftOpacity: 0.15,
+    middleOpacity: 0.06,
+    rightOpacity: 0.015,
     middleStop: 38,
     rightStop: 74,
     focalX: 54,
     focalY: 48,
     focalWidth: 100,
     focalHeight: 76,
-    focalCoreOpacity: 0.42,
-    focalSoftOpacity: 0.23,
+    focalCoreOpacity: 0.34,
+    focalSoftOpacity: 0.18,
   },
 
 
   {
-    leftOpacity: 0.24,
-    middleOpacity: 0.08,
-    rightOpacity: 0.02,
+    leftOpacity: 0.18,
+    middleOpacity: 0.06,
+    rightOpacity: 0.015,
     middleStop: 45,
     rightStop: 78,
     focalX: 50,
     focalY: 50,
     focalWidth: 96,
     focalHeight: 76,
-    focalCoreOpacity: 0.30,
-    focalSoftOpacity: 0.12,
+    focalCoreOpacity: 0.25,
+    focalSoftOpacity: 0.10,
   },
 
 
   {
-    leftOpacity: 0.30,
-    middleOpacity: 0.12,
-    rightOpacity: 0.03,
+    leftOpacity: 0.22,
+    middleOpacity: 0.09,
+    rightOpacity: 0.02,
     middleStop: 44,
     rightStop: 77,
     focalX: 32,
     focalY: 50,
     focalWidth: 92,
     focalHeight: 72,
-    focalCoreOpacity: 0.46,
-    focalSoftOpacity: 0.18,
+    focalCoreOpacity: 0.36,
+    focalSoftOpacity: 0.14,
   },
 
 
   {
-    leftOpacity: 0.22,
-    middleOpacity: 0.08,
-    rightOpacity: 0.02,
+    leftOpacity: 0.17,
+    middleOpacity: 0.06,
+    rightOpacity: 0.015,
     middleStop: 42,
     rightStop: 76,
     focalX: 48,
     focalY: 47,
     focalWidth: 102,
     focalHeight: 78,
-    focalCoreOpacity: 0.30,
-    focalSoftOpacity: 0.13,
+    focalCoreOpacity: 0.24,
+    focalSoftOpacity: 0.11,
   },
 
 
   {
-    leftOpacity: 0.16,
-    middleOpacity: 0.055,
+    leftOpacity: 0.12,
+    middleOpacity: 0.042,
     rightOpacity: 0.01,
     middleStop: 40,
     rightStop: 76,
@@ -1132,23 +1525,23 @@ const worldScrimStates:
     focalY: 48,
     focalWidth: 108,
     focalHeight: 82,
-    focalCoreOpacity: 0.20,
-    focalSoftOpacity: 0.08,
+    focalCoreOpacity: 0.16,
+    focalSoftOpacity: 0.065,
   },
 
 
   {
-    leftOpacity: 0.42,
-    middleOpacity: 0.16,
-    rightOpacity: 0.03,
+    leftOpacity: 0.30,
+    middleOpacity: 0.11,
+    rightOpacity: 0.02,
     middleStop: 42,
     rightStop: 74,
     focalX: 38,
     focalY: 56,
     focalWidth: 88,
     focalHeight: 68,
-    focalCoreOpacity: 0.32,
-    focalSoftOpacity: 0.15,
+    focalCoreOpacity: 0.25,
+    focalSoftOpacity: 0.12,
   },
 
 ]
@@ -2377,7 +2770,7 @@ function animate(
   // --------------------------------------------------
 
   blueFill.intensity =
-    0.32 +
+    0.54 +
     Math.sin(
       elapsed *
       0.35,
@@ -2386,7 +2779,7 @@ function animate(
 
 
   entranceLight.intensity =
-    0.84 +
+    1.28 +
     Math.sin(
       elapsed *
       1.1,
@@ -2395,7 +2788,7 @@ function animate(
 
 
   moonLight.intensity =
-    2.5 +
+    3.1 +
     Math.sin(
       elapsed *
       0.18,

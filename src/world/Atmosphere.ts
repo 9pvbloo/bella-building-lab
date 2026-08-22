@@ -160,22 +160,22 @@ export class Atmosphere {
     // Global fog: broad depth separation across the full persistent world.
     scene.fog =
       new THREE.FogExp2(
-        0x0a1117,
-        0.0115,
+        0x122433,
+        0.0095,
       )
 
 
     const coolFogTexture =
       createSoftTexture(
-        'rgba(218,237,243,.22)',
-        'rgba(112,139,151,.10)',
+        'rgba(237,247,250,.26)',
+        'rgba(157,187,199,.12)',
       )
 
 
     const blueFogTexture =
       createSoftTexture(
-        'rgba(149,181,194,.16)',
-        'rgba(45,68,82,.075)',
+        'rgba(187,218,232,.18)',
+        'rgba(77,118,145,.09)',
       )
 
 
@@ -220,7 +220,7 @@ export class Atmosphere {
       -3.4,
       13,
       11,
-      0.16,
+      0.14,
       0.075,
       0.55,
       0.18,
@@ -236,7 +236,7 @@ export class Atmosphere {
       -2.8,
       15,
       12,
-      0.14,
+      0.12,
       0.06,
       0.42,
       0.2,
@@ -286,7 +286,7 @@ export class Atmosphere {
       2.0,
       10,
       3.2,
-      0.11,
+      0.10,
       0.11,
       0.8,
       0.07,
@@ -302,7 +302,7 @@ export class Atmosphere {
       1.7,
       11,
       3.0,
-      0.10,
+      0.09,
       0.085,
       0.7,
       0.06,
@@ -312,8 +312,8 @@ export class Atmosphere {
 
     const warmGlowTexture =
       createSoftTexture(
-        'rgba(255,205,144,.82)',
-        'rgba(218,137,79,.18)',
+        'rgba(255,228,184,.8)',
+        'rgba(236,176,111,.17)',
       )
 
 
@@ -326,7 +326,7 @@ export class Atmosphere {
           true,
 
         opacity:
-          0.17,
+          0.22,
 
         depthWrite:
           false,
@@ -367,8 +367,8 @@ export class Atmosphere {
 
     const coldGlowTexture =
       createSoftTexture(
-        'rgba(211,236,245,.34)',
-        'rgba(90,124,140,.09)',
+        'rgba(239,249,255,.38)',
+        'rgba(143,187,211,.10)',
       )
 
 
@@ -381,7 +381,7 @@ export class Atmosphere {
           true,
 
         opacity:
-          0.07,
+          0.085,
 
         depthWrite:
           false,
@@ -505,7 +505,7 @@ export class Atmosphere {
 
     // Existing localized warmth remains the human visual anchor.
     this.entranceGlowMaterial.opacity =
-      0.17 +
+      0.22 +
       Math.sin(
         elapsed *
         1.15,
@@ -533,7 +533,7 @@ export class Atmosphere {
 
 
     this.coldGlowMaterial.opacity =
-      0.07 +
+      0.085 +
       Math.sin(
         elapsed *
         0.32,
