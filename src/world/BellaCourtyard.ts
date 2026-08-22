@@ -301,32 +301,56 @@ function createFoliageClusterGeometry():
         index,
       )
 
+    const azimuth =
+      Math.atan2(
+        z,
+        x,
+      )
+
+
     const offset =
       1 +
       Math.sin(
-        x *
-          4.7 +
-        z *
-          2.9,
-      ) *
-        0.075 +
-      Math.cos(
+        azimuth *
+          3.2 +
         y *
-          5.3 -
-        x *
-          1.9,
+          2.1,
       ) *
-        0.055
+        0.115 +
+      Math.cos(
+        azimuth *
+          5.1 -
+        y *
+          1.7,
+      ) *
+        0.07
+
+    const upperTaper =
+      1 -
+      Math.max(
+        y,
+        0,
+      ) *
+        0.06
 
 
     positions.setXYZ(
       index,
       x *
-        offset,
+        offset *
+        upperTaper,
       y *
-        offset,
+        (
+          0.98 +
+          Math.sin(
+            azimuth *
+              2.2,
+          ) *
+            0.035
+        ),
       z *
-        offset,
+        offset *
+        upperTaper,
     )
   }
 
@@ -439,9 +463,9 @@ export class BellaCourtyard {
 
   private readonly treeFoliageMaterial =
     new THREE.MeshStandardMaterial({
-      color: '#26513e',
-      emissive: '#1c4032',
-      emissiveIntensity: 0.19,
+      color: '#2a563f',
+      emissive: '#193827',
+      emissiveIntensity: 0.21,
       roughness: 0.86,
       metalness: 0,
       vertexColors: true,
@@ -450,10 +474,10 @@ export class BellaCourtyard {
 
   private readonly trunkMaterial =
     new THREE.MeshStandardMaterial({
-      color: '#3c4232',
-      emissive: '#20271d',
-      emissiveIntensity: 0.09,
-      roughness: 0.76,
+      color: '#293329',
+      emissive: '#141b15',
+      emissiveIntensity: 0.06,
+      roughness: 0.82,
       metalness: 0.02,
       flatShading: true,
     })
@@ -997,10 +1021,10 @@ export class BellaCourtyard {
 
 
     const foliageColors = [
-      new THREE.Color('#2f5a43'),
-      new THREE.Color('#3f6c4e'),
-      new THREE.Color('#1d4431'),
-      new THREE.Color('#4e785a'),
+      new THREE.Color('#29543e'),
+      new THREE.Color('#356247'),
+      new THREE.Color('#224a36'),
+      new THREE.Color('#416c4e'),
     ]
 
 
@@ -1174,65 +1198,105 @@ export class BellaCourtyard {
         )
 
 
-        const clusterHeights = [
-          0.5,
-          0.58,
-          0.64,
-          0.7,
-          0.75,
-          0.8,
-          0.85,
-          0.89,
-          0.94,
-        ]
+        const crownPads = [
+          {
+            angle: -2.16,
+            radius: 0.34,
+            height: 0.49,
+            width: 0.29,
+            vertical: 0.21,
+            depth: 0.72,
+          },
+          {
+            angle: -1.12,
+            radius: 0.68,
+            height: 0.57,
+            width: 0.35,
+            vertical: 0.27,
+            depth: 0.8,
+          },
+          {
+            angle: -0.26,
+            radius: 0.91,
+            height: 0.64,
+            width: 0.39,
+            vertical: 0.3,
+            depth: 0.86,
+          },
+          {
+            angle: 0.7,
+            radius: 0.56,
+            height: 0.7,
+            width: 0.33,
+            vertical: 0.25,
+            depth: 0.74,
+          },
+          {
+            angle: 1.56,
+            radius: 0.9,
+            height: 0.75,
+            width: 0.38,
+            vertical: 0.29,
+            depth: 0.82,
+          },
+          {
+            angle: 2.44,
+            radius: 0.58,
+            height: 0.81,
+            width: 0.34,
+            vertical: 0.25,
+            depth: 0.76,
+          },
+          {
+            angle: -0.76,
+            radius: 0.42,
+            height: 0.86,
+            width: 0.33,
+            vertical: 0.24,
+            depth: 0.76,
+          },
+          {
+            angle: 0.42,
+            radius: 0.3,
+            height: 0.9,
+            width: 0.3,
+            vertical: 0.22,
+            depth: 0.71,
+          },
+          {
+            angle: 1.82,
+            radius: 0.12,
+            height: 0.95,
+            width: 0.25,
+            vertical: 0.18,
+            depth: 0.68,
+          },
+        ] as const
 
-        const clusterRadii = [
-          0.38,
-          0.72,
-          0.95,
-          0.64,
-          1.05,
-          0.66,
-          0.9,
-          0.54,
-          0.2,
-        ]
 
-
-        clusterHeights.forEach(
+        crownPads.forEach(
           (
-            clusterHeight,
+            crownPad,
             cluster,
           ) => {
 
           const angle =
             tree.lean +
-            cluster *
-              1.29 +
+            crownPad.angle +
             treeIndex *
-              0.43
+              0.31
 
           const radius =
             tree.width *
-            clusterRadii[
-              cluster
-            ]
+            crownPad.radius
 
           const y =
             tree.height *
-            clusterHeight
+            crownPad.height
 
           const width =
             tree.width *
-            (
-              0.26 +
-              0.05 +
-              (
-                cluster %
-                  3
-                ) *
-                0.04
-            )
+            crownPad.width
 
 
           this.setInstance(
@@ -1251,23 +1315,9 @@ export class BellaCourtyard {
                 radius,
             width,
             tree.width *
-              (
-                0.22 +
-                (
-                  cluster %
-                    2
-                ) *
-                  0.07
-              ),
+              crownPad.vertical,
             width *
-              (
-                0.72 +
-                (
-                  cluster %
-                    3
-                ) *
-                  0.08
-              ),
+              crownPad.depth,
             angle,
           )
 
